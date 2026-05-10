@@ -3,60 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS Rescate v2.3.6</title>
+    <title>RECAUDERIA - POS v2.4</title>
     <style>
-        :root { --primary: #2e7d32; --bg: #f1f3f4; --accent: #f57c00; --white: #ffffff; --danger: #c62828; --info: #0288d1; --promo: #ff9800; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: var(--primary); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        :root {
+            --primary: #2e7d32;
+            --secondary: #81c784;
+            --bg: #f1f3f4;
+            --accent: #f57c00;
+            --white: #ffffff;
+            --danger: #c62828;
+            --info: #0288d1;
+            --promo: #ff9800;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--primary); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
         .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 15px; padding: 15px; flex: 1; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .product-card { background: var(--white); border-radius: 15px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start; }
+
+        .product-card { 
+            background: var(--white); border-radius: 15px; padding: 15px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #ddd;
+            display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;
+        }
+
         .product-name { font-weight: bold; color: var(--primary); font-size: 1.1em; display: flex; justify-content: space-between; }
-        .price-box { background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 8px; text-align: center; }
-        .price-box input { width: 60px; border: none; background: none; font-weight: bold; color: var(--accent); text-align: center; font-size: 1.1em; }
-        .qty-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .gramos-box { background: #e3f2fd; padding: 8px; border-radius: 10px; display: grid; grid-template-columns: 1fr 55px; gap: 8px; }
-        .gramos-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; outline: none; box-sizing: border-box; }
-        .btn-ok { background: var(--info); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        .price-row { display: grid; grid-template-columns: 1fr 45px; gap: 5px; align-items: center; }
+        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 6px; border-radius: 8px; text-align: center; font-size: 0.9em; }
+        .price-edit input { width: 55px; border: none; background: none; font-weight: bold; color: var(--accent); outline: none; text-align: center; font-size: 1.1em; }
+        
+        .btn-promo-config { background: var(--promo); color: white; border: none; height: 35px; border-radius: 8px; cursor: pointer; font-size: 1.1em; display: flex; justify-content: center; align-items: center; }
+
+        .qty-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 2px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8em; }
+
+        .active-promos-area { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; min-height: 5px; }
+        .btn-apply-promo { background: var(--promo); color: white; border: none; padding: 5px 8px; border-radius: 5px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
+
+        .gramos-box { 
+            background: #e3f2fd; padding: 6px; border-radius: 10px; border: 1px solid #bbdefb;
+            display: grid; grid-template-columns: 1fr 45px; gap: 5px; box-sizing: border-box;
+        }
+        .gramos-input { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #90caf9; font-size: 0.9em; outline: none; }
+        .btn-ok { background: var(--info); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; }
+
+        /* TICKET */
         .ticket-panel { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 70px; }
-        .ticket-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
-        .total-section { font-size: 2em; font-weight: bold; text-align: right; color: var(--primary); padding: 15px 0; }
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
-        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; font-size: 0.8em; font-weight: bold; }
-        @media (max-width: 800px) { .main-layout { grid-template-columns: 1fr; } .ticket-panel { order: -1; position: relative; top: 0; } }
+        .ticket-list { max-height: 300px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
+        .ticket-item { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .ticket-main { display: flex; justify-content: space-between; font-weight: bold; }
+        .ticket-savings { color: var(--danger); font-size: 0.8em; font-weight: bold; }
+
+        .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
+
+        /* MODALES E ICONOS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; width: 95%; max-width: 500px; border-radius: 15px; padding: 20px; max-height: 85vh; overflow-y: auto; }
+        .btn-icon { border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: white; margin-left: 5px; font-size: 1.1em; }
+
+        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 0.75em; text-decoration: none; }
+
+        @media (max-width: 800px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .ticket-panel { order: -1; position: relative; top: 0; margin-bottom: 20px; }
+            header { flex-wrap: wrap; gap: 8px; justify-content: center; }
+            .nav-buttons { display: flex; width: 100%; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
 
 <header>
     <strong>🍎 RECAUDERIA</strong>
-    <div style="display:flex; gap:5px;">
-        <button class="nav-btn" onclick="limpiarCacheYRecargar()" style="background: var(--danger);">🔄 RESET</button>
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="abrirHistorialVentas()" style="background: var(--info);">📊 VENTAS</button>
+        <button class="nav-btn" onclick="prepararCierreDiario()" style="background: var(--accent);">🌙 CIERRE</button>
         <a href="Registro.html" class="nav-btn">⚙️ CONFIG</a>
     </div>
 </header>
 
 <div class="main-layout">
     <div class="products-grid" id="gridProductos"></div>
-    <div class="ticket-panel">
-        <h3 style="margin:0">🛒 Ticket</h3>
-        <div id="ticketList"></div>
-        <div class="total-section">$<span id="totalVenta">0.00</span></div>
-        <button class="btn-confirm" onclick="finalizarVenta()">COBRAR</button>
+    <div class="ticket-panel" id="panelTicket">
+        <h3 style="margin:0">🛒 Ticket <span id="modoTicket" style="font-size:0.5em; color:var(--accent); display:none;">(EDICIÓN)</span></h3>
+        <div class="ticket-list" id="ticketList"></div>
+        <div class="total-section">Total: $<span id="totalVenta">0.00</span></div>
+        <button class="btn-confirm" id="btnFinalizar" onclick="finalizarVenta()">REGISTRAR VENTA</button>
+        <button id="btnDescartar" onclick="descartarEdicion()" style="display:none; width:100%; background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; font-weight:bold;">CANCELAR EDICIÓN</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalPromo">
+    <div class="modal-content">
+        <h2 style="color: var(--promo); margin-top:0;">⭐ Nueva Promoción</h2>
+        <p id="promoProdName" style="font-weight:bold;"></p>
+        <div style="display:grid; gap:10px; margin-top:10px;">
+            <label>Kilos combo: <input type="number" id="promoKilos" value="2" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"></label>
+            <label>Precio Total $: <input type="number" id="promoPrecio" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"></label>
+            <label>Días vigencia: <input type="number" id="promoDias" value="1" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"></label>
+        </div>
+        <button onclick="guardarNuevaPromo()" style="width:100%; background:var(--promo); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:15px;">ACTIVAR PROMO</button>
+        <button onclick="cerrarModalPromo()" style="width:100%; background:#eee; border:none; padding:10px; border-radius:10px; margin-top:8px; cursor:pointer;">CERRAR</button>
+        <div id="listaPromosActuales" style="margin-top:15px; font-size:0.85em; border-top:1px solid #eee; padding-top:10px;"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalUniversal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+            <h2 id="modalTitulo" style="margin:0; font-size: 1.1em; color:var(--primary);">Detalle</h2>
+            <button onclick="cerrarModal()" style="background:none; border:none; font-size:2em; cursor:pointer;">&times;</button>
+        </div>
+        <div id="modalCuerpo" style="margin-top:15px;"></div>
     </div>
 </div>
 
 <script>
-    // CARGA ULTRA SEGURA
-    let productos = [];
+    let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
+    let ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || [];
+    let promosActivas = [];
     try {
-        const stored = localStorage.getItem('recauderia_prods');
-        productos = stored ? JSON.parse(stored) : [];
-        console.log("Productos cargados:", productos);
-    } catch(e) { console.error("Error productos:", e); productos = []; }
+        let pStored = JSON.parse(localStorage.getItem('recauderia_promos'));
+        promosActivas = Array.isArray(pStored) ? pStored : [];
+    } catch(e) { promosActivas = []; }
 
     let ticket = [];
+    let enEdicion = false;
+    let respaldoVenta = null;
+    let prodEnEdicionPromo = null;
 
     function renderizarProductos() {
         const grid = document.getElementById('gridProductos');
@@ -64,26 +141,29 @@
         grid.innerHTML = "";
 
         if (productos.length === 0) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:15px;">
-                <h3>No hay productos.</h3>
-                <p>Ve a CONFIG para agregar tus 2 productos.</p>
-            </div>`;
+            grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos. Registra en Configuración.</p>`;
             return;
         }
 
         productos.forEach(p => {
+            const misPromos = promosActivas.filter(pr => pr && pr.prodId == p.id && new Date(pr.vence) > new Date());
+            const botonesPromo = misPromos.map(pr => 
+                `<button class="btn-apply-promo" onclick="aplicarPromoDirecta('${pr.id}')">${pr.kilosCombo}kg x $${pr.precioCombo}</button>`
+            ).join('');
+
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-                <div class="product-name">
-                    ${p.nombre} 
-                    <span style="font-size:0.7em; color:#888;">${parseFloat(p.kilos).toFixed(2)}kg</span>
+                <div class="product-name">${p.nombre} <span style="font-size:0.6em; color:#888;">${parseFloat(p.kilos).toFixed(2)}kg</span></div>
+                <div class="price-row">
+                    <div class="price-edit">$ <input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">/kg</div>
+                    <button class="btn-promo-config" onclick="abrirConfigPromo('${p.id}')">⭐</button>
                 </div>
-                <div class="price-box">$ <input type="number" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)"> /kg</div>
+                <div class="active-promos-area">${botonesPromo}</div>
                 <div class="qty-row">
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4</button>
+                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 1)">1kg</button>
+                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 0.5)">1/2</button>
+                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 0.25)">1/4</button>
                 </div>
                 <div class="gramos-box">
                     <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos">
@@ -94,58 +174,146 @@
         });
     }
 
-    function agregarTicket(id, cant) {
+    // --- PROMOCIONES ---
+    function abrirConfigPromo(id) {
+        prodEnEdicionPromo = productos.find(p => p.id == id);
+        document.getElementById('promoProdName').innerText = prodEnEdicionPromo.nombre;
+        document.getElementById('modalPromo').style.display = 'flex';
+        listarPromos();
+    }
+
+    function guardarNuevaPromo() {
+        const k = parseFloat(document.getElementById('promoKilos').value);
+        const pr = parseFloat(document.getElementById('promoPrecio').value);
+        const d = parseInt(document.getElementById('promoDias').value);
+        const v = new Date(); v.setDate(v.getDate() + d);
+        promosActivas.push({ id: Date.now().toString(), prodId: prodEnEdicionPromo.id, kilosCombo: k, precioCombo: pr, vence: v.toISOString() });
+        localStorage.setItem('recauderia_promos', JSON.stringify(promosActivas));
+        listarPromos(); renderizarProductos();
+    }
+
+    function listarPromos() {
+        const lista = document.getElementById('listaPromosActuales');
+        const misP = promosActivas.filter(pr => pr.prodId == prodEnEdicionPromo.id);
+        lista.innerHTML = misP.map(pr => `• ${pr.kilosCombo}kg x $${pr.precioCombo} <button onclick="eliminarPromo('${pr.id}')" style="color:red; border:none; background:none; cursor:pointer;">[X]</button>`).join('<br>');
+    }
+
+    function eliminarPromo(id) {
+        promosActivas = promosActivas.filter(p => p.id != id);
+        localStorage.setItem('recauderia_promos', JSON.stringify(promosActivas));
+        listarPromos(); renderizarProductos();
+    }
+
+    function aplicarPromoDirecta(promoId) {
+        const promo = promosActivas.find(pr => pr.id == promoId);
+        const p = productos.find(prod => prod.id == promo.prodId);
+        const ahorro = (p.precioVenta * promo.kilosCombo) - promo.precioCombo;
+        ticket.push({ id: p.id, nombre: `${p.nombre} (COMBO)`, cantidad: promo.kilosCombo, subtotal: promo.precioCombo, ahorro: ahorro });
+        actualizarUI();
+    }
+
+    // --- VENTAS ---
+    function agregarAlTicket(id, cant) {
         const p = productos.find(prod => prod.id == id);
-        if(p) {
-            ticket.push({ nombre: p.nombre, cantidad: cant, subtotal: p.precioVenta * cant, id: p.id });
-            actualizarUI();
-        }
+        ticket.push({ id: p.id, nombre: p.nombre, cantidad: cant, subtotal: p.precioVenta * cant, ahorro: 0 });
+        actualizarUI();
     }
 
     function agregarGramos(id) {
-        const val = document.getElementById(`gr_${id}`).value;
-        if(val > 0) { agregarTicket(id, val/1000); document.getElementById(`gr_${id}`).value = ''; }
+        const g = parseFloat(document.getElementById(`gr_${id}`).value);
+        if(g > 0) { agregarAlTicket(id, g/1000); document.getElementById(`gr_${id}`).value = ''; }
     }
 
     function actualizarUI() {
         const list = document.getElementById('ticketList');
-        let total = 0;
+        let t = 0;
         list.innerHTML = ticket.map((item, i) => {
-            total += item.subtotal;
-            return `<div class="ticket-item">
-                <span>${item.nombre}</span>
-                <span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()">&times;</button></span>
-            </div>`;
+            t += item.subtotal;
+            const peso = item.cantidad < 1 ? (item.cantidad*1000)+'g' : item.cantidad+'kg';
+            return `<div class="ticket-item"><div class="ticket-main"><span>${item.nombre} (${peso})</span><span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none;">&times;</button></span></div>${item.ahorro > 0 ? `<div class="ticket-savings">Ahorro: -$${item.ahorro.toFixed(2)}</div>` : ''}</div>`;
         }).join('');
-        document.getElementById('totalVenta').innerText = total.toFixed(2);
+        document.getElementById('totalVenta').innerText = t.toFixed(2);
     }
 
     function finalizarVenta() {
         if(ticket.length === 0) return;
-        ticket.forEach(item => {
-            const idx = productos.findIndex(p => p.id == item.id);
-            if(idx !== -1) productos[idx].kilos -= item.cantidad;
-        });
+        ticket.forEach(item => { const idx = productos.findIndex(p => p.id == item.id); if(idx !== -1) productos[idx].kilos -= item.cantidad; });
+        const v = { id: Date.now(), total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString(), items: [...ticket] };
+        ventasHoy.unshift(v);
+        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        ticket = []; actualizarUI(); renderizarProductos();
-        alert("Venta registrada.");
+        limpiarEstado(); renderizarProductos();
+    }
+
+    function abrirHistorialVentas() {
+        if(enEdicion) { alert("Termina la edición actual."); return; }
+        document.getElementById('modalTitulo').innerText = "Ventas de Hoy";
+        const cuerpo = document.getElementById('modalCuerpo');
+        if(ventasHoy.length === 0) { cuerpo.innerHTML = "Sin ventas."; }
+        else {
+            cuerpo.innerHTML = `<table style="width:100%; border-collapse:collapse;">` + ventasHoy.map(v => `
+            <tr style="border-bottom:1px solid #eee;">
+                <td>${v.hora}</td><td><strong>$${v.total.toFixed(2)}</strong></td>
+                <td style="text-align:right;">
+                    <button class="btn-icon" style="background:var(--info)" onclick="modificarVenta(${v.id})">✏️</button>
+                    <button class="btn-icon" style="background:var(--danger)" onclick="cancelarVenta(${v.id})">🗑️</button>
+                </td>
+            </tr>`).join('') + `</table>`;
+        }
+        document.getElementById('modalUniversal').style.display = 'flex';
+    }
+
+    function modificarVenta(id) {
+        const idx = ventasHoy.findIndex(v => v.id == id);
+        respaldoVenta = JSON.parse(JSON.stringify(ventasHoy[idx]));
+        enEdicion = true;
+        respaldoVenta.items.forEach(i => { const pIdx = productos.findIndex(p => p.id == i.id); if(pIdx !== -1) productos[pIdx].kilos += i.cantidad; });
+        ticket = [...respaldoVenta.items];
+        ventasHoy.splice(idx, 1);
+        document.getElementById('modoTicket').style.display = 'inline';
+        document.getElementById('btnDescartar').style.display = 'block';
+        document.getElementById('btnFinalizar').innerText = "GUARDAR CAMBIOS";
+        actualizarUI(); renderizarProductos(); cerrarModal();
+    }
+
+    function descartarEdicion() {
+        ticket.forEach(i => { const pIdx = productos.findIndex(p => p.id == i.id); if(pIdx !== -1) productos[pIdx].kilos -= i.cantidad; });
+        ventasHoy.unshift(respaldoVenta);
+        limpiarEstado(); renderizarProductos();
+    }
+
+    function cancelarVenta(id) {
+        if(!confirm("¿Regresar stock y borrar?")) return;
+        const idx = ventasHoy.findIndex(v => v.id == id);
+        ventasHoy[idx].items.forEach(i => { const pIdx = productos.findIndex(p => p.id == i.id); if(pIdx !== -1) productos[pIdx].kilos += i.cantidad; });
+        ventasHoy.splice(idx, 1);
+        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
+        renderizarProductos(); abrirHistorialVentas();
+    }
+
+    function limpiarEstado() {
+        ticket = []; enEdicion = false; respaldoVenta = null;
+        document.getElementById('modoTicket').style.display = 'none';
+        document.getElementById('btnDescartar').style.display = 'none';
+        document.getElementById('btnFinalizar').innerText = "REGISTRAR VENTA";
+        actualizarUI();
+    }
+
+    function prepararCierreDiario() {
+        const t = ventasHoy.reduce((a,b)=>a+b.total, 0);
+        document.getElementById('modalTitulo').innerText = "Cierre";
+        document.getElementById('modalCuerpo').innerHTML = `<h3>Total: $${t.toFixed(2)}</h3><button class="btn-confirm" onclick="ventasHoy=[]; localStorage.removeItem('recauderia_ventas'); location.reload();">CERRAR DÍA</button>`;
+        document.getElementById('modalUniversal').style.display = 'flex';
     }
 
     function actualizarPrecio(id, v) {
         const idx = productos.findIndex(p => p.id == id);
-        if(idx !== -1) {
-            productos[idx].precioVenta = parseFloat(v);
-            localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        }
+        productos[idx].precioVenta = parseFloat(v) || 0;
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
     }
-
-    function limpiarCacheYRecargar() {
-        if(confirm("Esto limpiará errores de promociones pero mantendrá tus productos. ¿Continuar?")) {
-            localStorage.removeItem('recauderia_promos');
-            location.reload();
-        }
-    }
-
+    function cerrarModal() { document.getElementById('modalUniversal').style.display = 'none'; }
+    function cerrarModalPromo() { document.getElementById('modalPromo').style.display = 'none'; }
     window.onload = renderizarProductos;
 </script>
 </body>
