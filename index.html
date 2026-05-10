@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS v2.2</title>
+    <title>RECAUDERIA - POS MultiproMo v2.3</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -33,27 +33,31 @@
         .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 6px; border-radius: 8px; text-align: center; font-size: 0.9em; }
         .price-edit input { width: 55px; border: none; background: none; font-weight: bold; color: var(--accent); outline: none; text-align: center; }
         
-        .btn-promo { background: var(--promo); color: white; border: none; height: 35px; border-radius: 8px; cursor: pointer; font-size: 1.1em; display: flex; justify-content: center; align-items: center; }
+        .btn-promo-config { background: var(--promo); color: white; border: none; height: 35px; border-radius: 8px; cursor: pointer; font-size: 1.1em; display: flex; justify-content: center; align-items: center; }
 
         .qty-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
         .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 2px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8em; }
+
+        /* CONTENEDOR DE BOTONES DE PROMO ACTIVOS */
+        .active-promos-area { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .btn-apply-promo { background: var(--promo); color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
 
         .gramos-box { background: #e3f2fd; padding: 6px; border-radius: 8px; border: 1px solid #bbdefb; display: grid; grid-template-columns: 1fr 40px; gap: 5px; }
         .gramos-input { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #90caf9; font-size: 0.9em; outline: none; }
         .btn-ok { background: var(--info); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; }
 
-        /* TICKET CON DESCUENTOS */
+        /* TICKET */
         .ticket-panel { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 70px; }
         .ticket-list { max-height: 300px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
-        .ticket-item { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em; position: relative; }
+        .ticket-item { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
         .ticket-main { display: flex; justify-content: space-between; font-weight: bold; }
-        .ticket-savings { color: var(--danger); font-size: 0.8em; font-style: italic; }
+        .ticket-savings { color: var(--danger); font-size: 0.8em; font-weight: bold; }
 
         .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
         .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; width: 95%; max-width: 450px; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-content { background: white; width: 95%; max-width: 450px; border-radius: 15px; padding: 25px; }
         
         .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 0.75em; }
 
@@ -66,7 +70,7 @@
 <body>
 
 <header>
-    <strong>🍎 RECAUDERIA POS v2.2</strong>
+    <strong>🍎 RECAUDERIA POS v2.3</strong>
     <div style="display:flex; gap:5px;">
         <button class="nav-btn" onclick="abrirHistorialVentas()" style="background: var(--info);">📊 VENTAS</button>
         <button class="nav-btn" onclick="prepararCierreDiario()" style="background: var(--accent);">🌙 CIERRE</button>
@@ -81,41 +85,44 @@
         <div class="ticket-list" id="ticketList"></div>
         <div class="total-section">Total: $<span id="totalVenta">0.00</span></div>
         <button class="btn-confirm" onclick="finalizarVenta()">REGISTRAR VENTA</button>
+        <button onclick="limpiarTicket()" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; width:100%;">Vaciar Ticket</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="modalPromo">
     <div class="modal-content">
-        <h2 style="color: var(--promo); margin-top:0;">⭐ Configurar Promoción</h2>
+        <h2 style="color: var(--promo); margin-top:0;">⭐ Nueva Promoción</h2>
         <p id="promoProdName" style="font-weight:bold;"></p>
         
         <div style="display:grid; gap:15px; margin-top:15px;">
             <div class="form-group">
-                <label style="display:block; font-size:0.8em; color:#666;">Kilos para el combo:</label>
+                <label>Kilos del combo:</label>
                 <input type="number" id="promoKilos" value="2" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
             </div>
             <div class="form-group">
-                <label style="display:block; font-size:0.8em; color:#666;">Precio Total del combo ($):</label>
+                <label>Precio Total del combo ($):</label>
                 <input type="number" id="promoPrecio" placeholder="Ej: 50" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
             </div>
             <div class="form-group">
-                <label style="display:block; font-size:0.8em; color:#666;">Vigencia (días):</label>
+                <label>Vigencia (días):</label>
                 <input type="number" id="promoDias" value="1" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-                <small style="color:#999;">1 = Solo hoy. 7 = Una semana.</small>
             </div>
         </div>
 
         <div style="display:flex; gap:10px; margin-top:25px;">
-            <button onclick="guardarConfigPromo()" style="flex:1; background:var(--promo); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">ACTIVAR PROMO</button>
-            <button onclick="cerrarModalPromo()" style="flex:1; background:#eee; border:none; padding:15px; border-radius:10px; cursor:pointer;">CANCELAR</button>
+            <button onclick="guardarNuevaPromo()" style="flex:1; background:var(--promo); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">ACTIVAR</button>
+            <button onclick="cerrarModalPromo()" style="flex:1; background:#eee; border:none; padding:15px; border-radius:10px; cursor:pointer;">SALIR</button>
         </div>
+        
+        <div id="listaPromosActuales" style="margin-top:20px; font-size:0.8em; text-align:left; border-top:1px solid #eee; padding-top:10px;">
+            </div>
     </div>
 </div>
 
 <script>
     let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
     let ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || [];
-    let promosActivas = JSON.parse(localStorage.getItem('recauderia_promos')) || {};
+    let promosActivas = JSON.parse(localStorage.getItem('recauderia_promos')) || []; // Ahora es un Array
     let ticket = [];
     let prodEnEdicionPromo = null;
 
@@ -124,25 +131,30 @@
         if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos.</p>`; return; }
         
         grid.innerHTML = productos.map(p => {
-            // Verificar si hay promo activa y vigente
-            const promo = promosActivas[p.id];
-            const esVigente = promo && new Date(promo.vence) > new Date();
-            const promoBadge = esVigente ? `<span style="background:var(--promo); color:white; font-size:0.5em; padding:2px 5px; border-radius:3px; vertical-align:middle;">PROMO ACTIVA</span>` : '';
+            // Filtrar promos vigentes para este producto
+            const misPromos = promosActivas.filter(pr => pr.prodId === p.id && new Date(pr.vence) > new Date());
+            
+            const botonesPromo = misPromos.map(pr => 
+                `<button class="btn-apply-promo" onclick="aplicarPromoDirecta('${pr.id}')">${pr.kilosCombo}kg x $${pr.precioCombo}</button>`
+            ).join('');
 
             return `
             <div class="product-card">
                 <div class="product-name">
-                    ${p.nombre} ${promoBadge}
+                    ${p.nombre} 
                     <span style="font-size:0.65em; color:#888;">${p.kilos.toFixed(2)}kg</span>
                 </div>
                 <div class="price-row">
                     <div class="price-edit">$ <input type="number" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">/kg</div>
-                    <button class="btn-promo" onclick="abrirConfigPromo('${p.id}')">⭐</button>
+                    <button class="btn-promo-config" onclick="abrirConfigPromo('${p.id}')">⭐</button>
                 </div>
+                
+                <div class="active-promos-area">${botonesPromo}</div>
+
                 <div class="qty-row">
-                    <button class="btn-qty" onclick="intentarAplicarPromo('${p.id}', 1)">1kg</button>
-                    <button class="btn-qty" onclick="intentarAplicarPromo('${p.id}', 0.5)">1/2</button>
-                    <button class="btn-qty" onclick="intentarAplicarPromo('${p.id}', 0.25)">1/4</button>
+                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 1)">1kg</button>
+                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 0.5)">1/2</button>
+                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 0.25)">1/4</button>
                 </div>
                 <div class="gramos-box">
                     <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos">
@@ -152,54 +164,77 @@
         }).join('');
     }
 
-    // --- MOTOR DE PROMOCIONES ---
+    // --- LÓGICA DE PROMOCIONES ---
     function abrirConfigPromo(id) {
         prodEnEdicionPromo = productos.find(p => p.id.toString() === id.toString());
         document.getElementById('promoProdName').innerText = prodEnEdicionPromo.nombre;
         document.getElementById('modalPromo').style.display = 'flex';
+        listarPromosDelProducto();
     }
 
-    function guardarConfigPromo() {
+    function listarPromosDelProducto() {
+        const lista = document.getElementById('listaPromosActuales');
+        const misPromos = promosActivas.filter(pr => pr.prodId === prodEnEdicionPromo.id);
+        
+        if(misPromos.length === 0) {
+            lista.innerHTML = "Sin promociones activas.";
+        } else {
+            lista.innerHTML = "<strong>Promos Vigentes:</strong><br>" + misPromos.map(pr => 
+                `• ${pr.kilosCombo}kg por $${pr.precioCombo} (Vence: ${new Date(pr.vence).toLocaleDateString()}) 
+                 <a href="#" onclick="eliminarPromo('${pr.id}')" style="color:red">Eliminar</a>`
+            ).join('<br>');
+        }
+    }
+
+    function guardarNuevaPromo() {
         const kilos = parseFloat(document.getElementById('promoKilos').value);
         const precio = parseFloat(document.getElementById('promoPrecio').value);
         const dias = parseInt(document.getElementById('promoDias').value);
 
-        if(!kilos || !precio) return alert("Completa los datos");
+        const vence = new Date();
+        vence.setDate(vence.getDate() + dias);
 
-        const fechaVence = new Date();
-        fechaVence.setDate(fechaVence.getDate() + dias);
-
-        promosActivas[prodEnEdicionPromo.id] = {
+        const nuevaPromo = {
+            id: Date.now().toString(),
+            prodId: prodEnEdicionPromo.id,
             kilosCombo: kilos,
             precioCombo: precio,
-            vence: fechaVence.toISOString()
+            vence: vence.toISOString()
         };
 
+        promosActivas.push(nuevaPromo);
         localStorage.setItem('recauderia_promos', JSON.stringify(promosActivas));
-        cerrarModalPromo();
+        listarPromosDelProducto();
         renderizarProductos();
-        alert(`Promoción activada para ${prodEnEdicionPromo.nombre} hasta el ${fechaVence.toLocaleDateString()}`);
+        alert("Nueva promoción agregada.");
     }
 
-    function intentarAplicarPromo(id, cant) {
-        const p = productos.find(prod => prod.id.toString() === id.toString());
-        const promo = promosActivas[p.id];
-        const esVigente = promo && new Date(promo.vence) > new Date();
+    function eliminarPromo(id) {
+        promosActivas = promosActivas.filter(pr => pr.id !== id);
+        localStorage.setItem('recauderia_promos', JSON.stringify(promosActivas));
+        listarPromosDelProducto();
+        renderizarProductos();
+    }
 
-        // Si el cliente pide exactamente la cantidad del combo y hay promo vigente
-        if(esVigente && cant === promo.kilosCombo) {
-            const ahorro = (p.precioVenta * cant) - promo.precioCombo;
-            ticket.push({
-                id: p.id,
-                nombre: `${p.nombre} (COMBO)`,
-                cantidad: cant,
-                subtotal: promo.precioCombo,
-                ahorro: ahorro
-            });
-        } else {
-            // Venta normal
-            ticket.push({ id: p.id, nombre: p.nombre, cantidad: cant, subtotal: p.precioVenta * cant, ahorro: 0 });
-        }
+    function aplicarPromoDirecta(promoId) {
+        const promo = promosActivas.find(pr => pr.id === promoId);
+        const p = productos.find(prod => prod.id === promo.prodId);
+        const ahorro = (p.precioVenta * promo.kilosCombo) - promo.precioCombo;
+
+        ticket.push({
+            id: p.id,
+            nombre: `${p.nombre} (COMBO ${promo.kilosCombo}kg)`,
+            cantidad: promo.kilosCombo,
+            subtotal: promo.precioCombo,
+            ahorro: ahorro
+        });
+        actualizarUI();
+    }
+
+    // --- FUNCIONES DE VENTA ---
+    function agregarAlTicket(id, cant) {
+        const p = productos.find(prod => prod.id.toString() === id.toString());
+        ticket.push({ id: p.id, nombre: p.nombre, cantidad: cant, subtotal: p.precioVenta * cant, ahorro: 0 });
         actualizarUI();
     }
 
@@ -215,30 +250,35 @@
                     <span>${item.nombre} (${pesoStr})</span>
                     <span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></span>
                 </div>
-                ${item.ahorro > 0 ? `<div class="ticket-savings">¡Ahorró $${item.ahorro.toFixed(2)}!</div>` : ''}
+                ${item.ahorro > 0 ? `<div class="ticket-savings">¡Ahorro aplicado: -$${item.ahorro.toFixed(2)}!</div>` : ''}
             </div>`;
         }).join('');
         document.getElementById('totalVenta').innerText = t.toFixed(2);
     }
 
-    // --- FUNCIONES BÁSICAS ---
+    function finalizarVenta() {
+        if(ticket.length === 0) return;
+        ticket.forEach(item => {
+            const idx = productos.findIndex(p => p.id === item.id);
+            if(idx !== -1) productos[idx].kilos -= item.cantidad;
+        });
+        const v = { id: Date.now(), total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString(), items: [...ticket] };
+        ventasHoy.unshift(v);
+        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
+        ticket = []; actualizarUI(); renderizarProductos();
+        alert("Venta registrada.");
+    }
+
+    function limpiarTicket() { ticket = []; actualizarUI(); }
     function agregarGramos(id) {
         const g = parseFloat(document.getElementById(`gr_${id}`).value);
-        if(g > 0) { intentarAplicarPromo(id, g/1000); document.getElementById(`gr_${id}`).value = ''; }
+        if(g > 0) { agregarAlTicket(id, g/1000); document.getElementById(`gr_${id}`).value = ''; }
     }
     function actualizarPrecio(id, v) { 
         const idx = productos.findIndex(p => p.id.toString() === id.toString());
         productos[idx].precioVenta = parseFloat(v) || 0;
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-    }
-    function finalizarVenta() {
-        if(ticket.length === 0) return;
-        const v = { id: Date.now(), total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString(), items: [...ticket] };
-        ticket.forEach(item => { const idx = productos.findIndex(p => p.id === item.id); if(idx !== -1) productos[idx].kilos -= item.cantidad; });
-        ventasHoy.unshift(v);
-        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
-        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        ticket = []; actualizarUI(); renderizarProductos();
     }
     function cerrarModalPromo() { document.getElementById('modalPromo').style.display = 'none'; }
     window.onload = renderizarProductos;
