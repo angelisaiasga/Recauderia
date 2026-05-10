@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS MultiproMo v2.3</title>
+    <title>RECAUDERIA - POS Blindado v2.3.5</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -16,61 +16,80 @@
             --promo: #ff9800;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: var(--primary); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        
+        header { 
+            background: var(--primary); color: white; padding: 10px 15px; 
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 15px; padding: 15px; flex: 1; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start; }
+
+        /* REJILLA DE PRODUCTOS */
+        .products-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 15px; align-content: start;
+        }
 
         .product-card { 
             background: var(--white); border-radius: 15px; padding: 15px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #ddd;
-            display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 10px; box-sizing: border-box;
         }
 
-        .product-name { font-weight: bold; color: var(--primary); font-size: 1.1em; display: flex; justify-content: space-between; }
+        .product-name { font-weight: bold; color: var(--primary); font-size: 1.1em; display: flex; justify-content: space-between; align-items: center; }
         
         .price-row { display: grid; grid-template-columns: 1fr 45px; gap: 5px; align-items: center; }
-        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 6px; border-radius: 8px; text-align: center; font-size: 0.9em; }
-        .price-edit input { width: 55px; border: none; background: none; font-weight: bold; color: var(--accent); outline: none; text-align: center; }
+        .price-edit-box { background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 8px; text-align: center; font-size: 0.9em; }
+        .price-edit-box input { width: 60px; border: none; background: none; font-weight: bold; color: var(--accent); outline: none; text-align: center; font-size: 1.1em; }
         
-        .btn-promo-config { background: var(--promo); color: white; border: none; height: 35px; border-radius: 8px; cursor: pointer; font-size: 1.1em; display: flex; justify-content: center; align-items: center; }
+        .btn-promo-star { background: var(--promo); color: white; border: none; height: 40px; border-radius: 8px; cursor: pointer; font-size: 1.2em; display: flex; justify-content: center; align-items: center; }
 
-        .qty-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
-        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 2px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8em; }
+        .qty-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 10px 2px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85em; }
 
-        /* CONTENEDOR DE BOTONES DE PROMO ACTIVOS */
-        .active-promos-area { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-        .btn-apply-promo { background: var(--promo); color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.7em; font-weight: bold; cursor: pointer; }
+        .active-promos-area { display: flex; flex-wrap: wrap; gap: 5px; min-height: 5px; }
+        .btn-apply-promo { background: var(--promo); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; cursor: pointer; animation: fadeIn 0.3s; }
 
-        .gramos-box { background: #e3f2fd; padding: 6px; border-radius: 8px; border: 1px solid #bbdefb; display: grid; grid-template-columns: 1fr 40px; gap: 5px; }
-        .gramos-input { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #90caf9; font-size: 0.9em; outline: none; }
-        .btn-ok { background: var(--info); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; }
+        .gramos-box { 
+            background: #e3f2fd; padding: 8px; border-radius: 10px; border: 1px solid #bbdefb;
+            display: grid; grid-template-columns: 1fr 55px; gap: 8px; box-sizing: border-box;
+        }
+        .gramos-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1em; outline: none; box-sizing: border-box; }
+        .btn-ok-gramos { background: var(--info); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
         /* TICKET */
-        .ticket-panel { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 70px; }
-        .ticket-list { max-height: 300px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
-        .ticket-item { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .ticket-panel { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 80px; }
+        .ticket-list { max-height: 350px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
+        .ticket-item { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 0.95em; }
         .ticket-main { display: flex; justify-content: space-between; font-weight: bold; }
-        .ticket-savings { color: var(--danger); font-size: 0.8em; font-weight: bold; }
+        .ticket-savings { color: var(--danger); font-size: 0.85em; font-weight: bold; margin-top: 4px; }
 
-        .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
+        .total-section { font-size: 2em; font-weight: bold; text-align: right; color: var(--primary); padding: 15px 0; border-top: 2px solid #eee; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 1.2em; cursor: pointer; }
 
+        /* MODALES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; width: 95%; max-width: 450px; border-radius: 15px; padding: 25px; }
+        .modal-content { background: white; width: 95%; max-width: 450px; border-radius: 15px; padding: 25px; max-height: 90vh; overflow-y: auto; }
         
-        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 0.75em; }
+        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 0.8em; text-decoration: none; }
 
-        @media (max-width: 800px) {
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 850px) {
             .main-layout { grid-template-columns: 1fr; }
             .ticket-panel { order: -1; position: relative; top: 0; margin-bottom: 20px; }
+            header { flex-wrap: wrap; gap: 10px; justify-content: center; }
+            .products-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <strong>🍎 RECAUDERIA POS v2.3</strong>
+    <strong>🍎 MI RECAUDERIA</strong>
     <div style="display:flex; gap:5px;">
         <button class="nav-btn" onclick="abrirHistorialVentas()" style="background: var(--info);">📊 VENTAS</button>
         <button class="nav-btn" onclick="prepararCierreDiario()" style="background: var(--accent);">🌙 CIERRE</button>
@@ -79,187 +98,211 @@
 </header>
 
 <div class="main-layout">
-    <div class="products-grid" id="gridProductos"></div>
+    <div class="products-grid" id="gridProductos">
+        </div>
+
     <div class="ticket-panel">
         <h3 style="margin:0">🛒 Ticket de Venta</h3>
         <div class="ticket-list" id="ticketList"></div>
-        <div class="total-section">Total: $<span id="totalVenta">0.00</span></div>
-        <button class="btn-confirm" onclick="finalizarVenta()">REGISTRAR VENTA</button>
-        <button onclick="limpiarTicket()" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; width:100%;">Vaciar Ticket</button>
+        <div class="total-section">$<span id="totalVenta">0.00</span></div>
+        <button class="btn-confirm" onclick="finalizarVenta()">COBRAR AHORA</button>
+        <button onclick="limpiarTicket()" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-top:15px; width:100%; font-weight:bold; text-decoration:underline;">Vaciar Carrito</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="modalPromo">
     <div class="modal-content">
-        <h2 style="color: var(--promo); margin-top:0;">⭐ Nueva Promoción</h2>
-        <p id="promoProdName" style="font-weight:bold;"></p>
+        <h2 style="color: var(--promo); margin-top:0;">⭐ Crear Promoción</h2>
+        <p id="promoProdName" style="font-weight:bold; font-size: 1.2em;"></p>
         
-        <div style="display:grid; gap:15px; margin-top:15px;">
-            <div class="form-group">
-                <label>Kilos del combo:</label>
-                <input type="number" id="promoKilos" value="2" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-            </div>
-            <div class="form-group">
-                <label>Precio Total del combo ($):</label>
-                <input type="number" id="promoPrecio" placeholder="Ej: 50" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-            </div>
-            <div class="form-group">
-                <label>Vigencia (días):</label>
-                <input type="number" id="promoDias" value="1" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-            </div>
+        <div style="display:grid; gap:12px; margin: 15px 0;">
+            <label>Kilos (ej: 2): <input type="number" id="promoKilos" value="2" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"></label>
+            <label>Precio Total Combo (ej: 50): <input type="number" id="promoPrecio" placeholder="0.00" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"></label>
+            <label>Vigencia (Días): <input type="number" id="promoDias" value="1" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"></label>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:25px;">
-            <button onclick="guardarNuevaPromo()" style="flex:1; background:var(--promo); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">ACTIVAR</button>
-            <button onclick="cerrarModalPromo()" style="flex:1; background:#eee; border:none; padding:15px; border-radius:10px; cursor:pointer;">SALIR</button>
-        </div>
+        <button onclick="guardarPromo()" style="width:100%; background:var(--promo); color:white; border:none; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">ACTIVAR PROMOCIÓN</button>
+        <button onclick="cerrarModalPromo()" style="width:100%; background:#eee; border:none; padding:12px; border-radius:10px; margin-top:10px; cursor:pointer;">CERRAR</button>
         
-        <div id="listaPromosActuales" style="margin-top:20px; font-size:0.8em; text-align:left; border-top:1px solid #eee; padding-top:10px;">
-            </div>
+        <div id="listaPromosActuales" style="margin-top:20px; border-top: 1px solid #eee; padding-top:10px; font-size:0.9em;"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalUniversal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+            <h2 id="modalTitulo" style="margin:0; font-size: 1.2em;">Detalle</h2>
+            <button onclick="cerrarModal()" style="background:none; border:none; font-size:2em; cursor:pointer;">&times;</button>
+        </div>
+        <div id="modalCuerpo" style="margin-top:15px;"></div>
     </div>
 </div>
 
 <script>
-    let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
-    let ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || [];
-    let promosActivas = JSON.parse(localStorage.getItem('recauderia_promos')) || []; // Ahora es un Array
+    // CARGA DE DATOS SEGURA
+    let productos = [];
+    try { productos = JSON.parse(localStorage.getItem('recauderia_prods')) || []; } catch(e) { productos = []; }
+    
+    let ventasHoy = [];
+    try { ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || []; } catch(e) { ventasHoy = []; }
+
+    let promosActivas = [];
+    try { 
+        let stored = JSON.parse(localStorage.getItem('recauderia_promos'));
+        promosActivas = Array.isArray(stored) ? stored : [];
+    } catch(e) { promosActivas = []; }
+
     let ticket = [];
     let prodEnEdicionPromo = null;
 
     function renderizarProductos() {
         const grid = document.getElementById('gridProductos');
-        if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos.</p>`; return; }
-        
-        grid.innerHTML = productos.map(p => {
-            // Filtrar promos vigentes para este producto
-            const misPromos = promosActivas.filter(pr => pr.prodId === p.id && new Date(pr.vence) > new Date());
-            
-            const botonesPromo = misPromos.map(pr => 
-                `<button class="btn-apply-promo" onclick="aplicarPromoDirecta('${pr.id}')">${pr.kilosCombo}kg x $${pr.precioCombo}</button>`
-            ).join('');
+        if (!grid) return;
+        grid.innerHTML = "";
 
-            return `
-            <div class="product-card">
-                <div class="product-name">
-                    ${p.nombre} 
-                    <span style="font-size:0.65em; color:#888;">${p.kilos.toFixed(2)}kg</span>
-                </div>
-                <div class="price-row">
-                    <div class="price-edit">$ <input type="number" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">/kg</div>
-                    <button class="btn-promo-config" onclick="abrirConfigPromo('${p.id}')">⭐</button>
-                </div>
-                
-                <div class="active-promos-area">${botonesPromo}</div>
-
-                <div class="qty-row">
-                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 1)">1kg</button>
-                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 0.5)">1/2</button>
-                    <button class="btn-qty" onclick="agregarAlTicket('${p.id}', 0.25)">1/4</button>
-                </div>
-                <div class="gramos-box">
-                    <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos">
-                    <button class="btn-ok" onclick="agregarGramos('${p.id}')">OK</button>
-                </div>
+        if (productos.length === 0) {
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:50px; background:white; border-radius:15px;">
+                <h3>¡Bienvenido!</h3>
+                <p>Aún no tienes productos. Ve a <strong>Configuración</strong> para registrar Aguacate, Jitomate, etc.</p>
             </div>`;
-        }).join('');
+            return;
+        }
+
+        productos.forEach(p => {
+            try {
+                const id = p.id;
+                const misPromos = promosActivas.filter(pr => pr && pr.prodId == id && new Date(pr.vence) > new Date());
+                
+                const botonesPromo = misPromos.map(pr => 
+                    `<button class="btn-apply-promo" onclick="aplicarPromoDirecta('${pr.id}')">${pr.kilosCombo}kg x $${pr.precioCombo}</button>`
+                ).join('');
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-name">
+                        ${p.nombre} 
+                        <span style="font-size:0.65em; color:#888; background:#f0f0f0; padding:2px 6px; border-radius:4px;">${parseFloat(p.kilos).toFixed(2)}kg</span>
+                    </div>
+                    <div class="price-row">
+                        <div class="price-edit-box">$ <input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${id}', this.value)"> / kg</div>
+                        <button class="btn-promo-star" onclick="abrirConfigPromo('${id}')">⭐</button>
+                    </div>
+                    <div class="active-promos-area">${botonesPromo}</div>
+                    <div class="qty-row">
+                        <button class="btn-qty" onclick="agregarAlTicket('${id}', 1)">1 kg</button>
+                        <button class="btn-qty" onclick="agregarAlTicket('${id}', 0.5)">1/2 kg</button>
+                        <button class="btn-qty" onclick="agregarAlTicket('${id}', 0.25)">1/4 kg</button>
+                    </div>
+                    <div class="gramos-box">
+                        <input type="number" id="gr_${id}" class="gramos-input" placeholder="Gramos">
+                        <button class="btn-ok-gramos" onclick="agregarGramos('${id}')">OK</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            } catch (err) { console.error("Fallo al renderizar producto:", p); }
+        });
     }
 
     // --- LÓGICA DE PROMOCIONES ---
     function abrirConfigPromo(id) {
-        prodEnEdicionPromo = productos.find(p => p.id.toString() === id.toString());
+        prodEnEdicionPromo = productos.find(p => p.id == id);
+        if(!prodEnEdicionPromo) return;
         document.getElementById('promoProdName').innerText = prodEnEdicionPromo.nombre;
         document.getElementById('modalPromo').style.display = 'flex';
-        listarPromosDelProducto();
+        actualizarListaPromos();
     }
 
-    function listarPromosDelProducto() {
-        const lista = document.getElementById('listaPromosActuales');
-        const misPromos = promosActivas.filter(pr => pr.prodId === prodEnEdicionPromo.id);
-        
-        if(misPromos.length === 0) {
-            lista.innerHTML = "Sin promociones activas.";
-        } else {
-            lista.innerHTML = "<strong>Promos Vigentes:</strong><br>" + misPromos.map(pr => 
-                `• ${pr.kilosCombo}kg por $${pr.precioCombo} (Vence: ${new Date(pr.vence).toLocaleDateString()}) 
-                 <a href="#" onclick="eliminarPromo('${pr.id}')" style="color:red">Eliminar</a>`
-            ).join('<br>');
-        }
-    }
+    function guardarPromo() {
+        const k = parseFloat(document.getElementById('promoKilos').value);
+        const p = parseFloat(document.getElementById('promoPrecio').value);
+        const d = parseInt(document.getElementById('promoDias').value);
 
-    function guardarNuevaPromo() {
-        const kilos = parseFloat(document.getElementById('promoKilos').value);
-        const precio = parseFloat(document.getElementById('promoPrecio').value);
-        const dias = parseInt(document.getElementById('promoDias').value);
+        if(!k || !p) return alert("Ingresa valores válidos");
 
         const vence = new Date();
-        vence.setDate(vence.getDate() + dias);
+        vence.setDate(vence.getDate() + d);
 
-        const nuevaPromo = {
+        promosActivas.push({
             id: Date.now().toString(),
             prodId: prodEnEdicionPromo.id,
-            kilosCombo: kilos,
-            precioCombo: precio,
+            kilosCombo: k,
+            precioCombo: p,
             vence: vence.toISOString()
-        };
+        });
 
-        promosActivas.push(nuevaPromo);
         localStorage.setItem('recauderia_promos', JSON.stringify(promosActivas));
-        listarPromosDelProducto();
+        actualizarListaPromos();
         renderizarProductos();
-        alert("Nueva promoción agregada.");
+    }
+
+    function actualizarListaPromos() {
+        const lista = document.getElementById('listaPromosActuales');
+        const misPromos = promosActivas.filter(pr => pr.prodId == prodEnEdicionPromo.id);
+        if(misPromos.length === 0) { lista.innerHTML = "No hay promociones para este producto."; return; }
+        
+        lista.innerHTML = "<strong>Vigentes:</strong><br>" + misPromos.map(pr => 
+            `• ${pr.kilosCombo}kg por $${pr.precioCombo} 
+            <button onclick="eliminarPromo('${pr.id}')" style="color:red; border:none; background:none; cursor:pointer;">[Eliminar]</button>`
+        ).join('<br>');
     }
 
     function eliminarPromo(id) {
-        promosActivas = promosActivas.filter(pr => pr.id !== id);
+        promosActivas = promosActivas.filter(pr => pr.id != id);
         localStorage.setItem('recauderia_promos', JSON.stringify(promosActivas));
-        listarPromosDelProducto();
+        actualizarListaPromos();
         renderizarProductos();
     }
 
     function aplicarPromoDirecta(promoId) {
-        const promo = promosActivas.find(pr => pr.id === promoId);
-        const p = productos.find(prod => prod.id === promo.prodId);
-        const ahorro = (p.precioVenta * promo.kilosCombo) - promo.precioCombo;
+        const pr = promosActivas.find(p => p.id == promoId);
+        const prod = productos.find(p => p.id == pr.prodId);
+        const ahorro = (prod.precioVenta * pr.kilosCombo) - pr.precioCombo;
 
         ticket.push({
-            id: p.id,
-            nombre: `${p.nombre} (COMBO ${promo.kilosCombo}kg)`,
-            cantidad: promo.kilosCombo,
-            subtotal: promo.precioCombo,
+            id: prod.id,
+            nombre: `${prod.nombre} (COMBO)`,
+            cantidad: pr.kilosCombo,
+            subtotal: pr.precioCombo,
             ahorro: ahorro
         });
         actualizarUI();
     }
 
-    // --- FUNCIONES DE VENTA ---
+    // --- FUNCIONES DE TICKET ---
     function agregarAlTicket(id, cant) {
-        const p = productos.find(prod => prod.id.toString() === id.toString());
+        const p = productos.find(prod => prod.id == id);
         ticket.push({ id: p.id, nombre: p.nombre, cantidad: cant, subtotal: p.precioVenta * cant, ahorro: 0 });
         actualizarUI();
     }
 
+    function agregarGramos(id) {
+        const input = document.getElementById(`gr_${id}`);
+        const g = parseFloat(input.value);
+        if(g > 0) { agregarAlTicket(id, g/1000); input.value = ''; }
+    }
+
     function actualizarUI() {
         const list = document.getElementById('ticketList');
-        let t = 0;
+        let total = 0;
         list.innerHTML = ticket.map((item, i) => {
-            t += item.subtotal;
-            const pesoStr = item.cantidad < 1 ? (item.cantidad*1000)+'g' : item.cantidad+'kg';
-            return `
-            <div class="ticket-item">
+            total += item.subtotal;
+            const peso = item.cantidad < 1 ? (item.cantidad*1000)+'g' : item.cantidad+'kg';
+            return `<div class="ticket-item">
                 <div class="ticket-main">
-                    <span>${item.nombre} (${pesoStr})</span>
-                    <span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></span>
+                    <span>${item.nombre} (${peso})</span>
+                    <span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="border:none; background:none; color:red; cursor:pointer;">&times;</button></span>
                 </div>
-                ${item.ahorro > 0 ? `<div class="ticket-savings">¡Ahorro aplicado: -$${item.ahorro.toFixed(2)}!</div>` : ''}
+                ${item.ahorro > 0 ? `<div class="ticket-savings">Ahorro: -$${item.ahorro.toFixed(2)}</div>` : ''}
             </div>`;
         }).join('');
-        document.getElementById('totalVenta').innerText = t.toFixed(2);
+        document.getElementById('totalVenta').innerText = total.toFixed(2);
     }
 
     function finalizarVenta() {
         if(ticket.length === 0) return;
         ticket.forEach(item => {
-            const idx = productos.findIndex(p => p.id === item.id);
+            const idx = productos.findIndex(p => p.id == item.id);
             if(idx !== -1) productos[idx].kilos -= item.cantidad;
         });
         const v = { id: Date.now(), total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString(), items: [...ticket] };
@@ -267,19 +310,36 @@
         localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
         ticket = []; actualizarUI(); renderizarProductos();
-        alert("Venta registrada.");
+        alert("¡Venta cobrada!");
     }
 
-    function limpiarTicket() { ticket = []; actualizarUI(); }
-    function agregarGramos(id) {
-        const g = parseFloat(document.getElementById(`gr_${id}`).value);
-        if(g > 0) { agregarAlTicket(id, g/1000); document.getElementById(`gr_${id}`).value = ''; }
-    }
-    function actualizarPrecio(id, v) { 
-        const idx = productos.findIndex(p => p.id.toString() === id.toString());
+    // --- GENERALES ---
+    function actualizarPrecio(id, v) {
+        const idx = productos.findIndex(p => p.id == id);
         productos[idx].precioVenta = parseFloat(v) || 0;
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
     }
+    function abrirHistorialVentas() {
+        document.getElementById('modalTitulo').innerText = "Ventas de Hoy";
+        const cuerpo = document.getElementById('modalCuerpo');
+        if(ventasHoy.length === 0) { cuerpo.innerHTML = "Sin ventas."; } 
+        else {
+            cuerpo.innerHTML = `<table style="width:100%;">` + ventasHoy.map(v => `
+                <tr style="border-bottom:1px solid #eee;">
+                    <td>${v.hora}</td><td><strong>$${v.total.toFixed(2)}</strong></td>
+                    <td style="text-align:right;"><button onclick="alert('Funcionalidad de edición en desarrollo')" style="background:var(--info); color:white; border:none; padding:5px; border-radius:4px;">Ver</button></td>
+                </tr>`).join('') + `</table>`;
+        }
+        document.getElementById('modalUniversal').style.display = 'flex';
+    }
+    function prepararCierreDiario() {
+        const total = ventasHoy.reduce((a,b)=>a+b.total, 0);
+        document.getElementById('modalTitulo').innerText = "Cierre de Caja";
+        document.getElementById('modalCuerpo').innerHTML = `<h3>Total: $${total.toFixed(2)}</h3><button class="btn-confirm" onclick="ventasHoy=[]; localStorage.removeItem('recauderia_ventas'); location.reload();">CERRAR DÍA</button>`;
+        document.getElementById('modalUniversal').style.display = 'flex';
+    }
+    function limpiarTicket() { ticket = []; actualizarUI(); }
+    function cerrarModal() { document.getElementById('modalUniversal').style.display = 'none'; }
     function cerrarModalPromo() { document.getElementById('modalPromo').style.display = 'none'; }
     window.onload = renderizarProductos;
 </script>
