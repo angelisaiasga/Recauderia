@@ -1,12 +1,9 @@
-
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS Pro v1.8</title>
+    <title>RECAUDERIA - POS Pro v1.9</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -41,7 +38,6 @@
             flex: 1;
         }
 
-        /* PANEL DE PRODUCTOS */
         .products-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
@@ -58,8 +54,11 @@
         .price-edit input { width: 70px; border: none; background: none; font-weight: bold; color: var(--accent); text-align: center; font-size: 1.1em; outline: none; }
 
         .btn-qty { background: #f8f9fa; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; margin: 2px; font-weight: 600; }
+        
+        /* Estilo para el input de gramos */
+        .gramos-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9em; outline: none; }
+        .btn-ok { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* TICKET */
         .ticket-panel { 
             background: var(--white); border-radius: 15px; display: flex; flex-direction: column; 
             padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
@@ -70,7 +69,6 @@
         .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
         .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1.1em; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; width: 95%; max-width: 700px; max-height: 90vh; border-radius: 15px; padding: 20px; overflow-y: auto; }
         
@@ -78,7 +76,6 @@
         .table-ventas th { background: #eee; padding: 8px; text-align: left; font-size: 0.85em; }
         .table-ventas td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 0.9em; }
 
-        /* BOTONES ICONO PARA MÓVIL */
         .btn-icon { border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1em; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; margin-left: 5px; color: white; }
         .btn-mod-icon { background-color: var(--info); }
         .btn-can-icon { background-color: var(--danger); }
@@ -139,11 +136,14 @@
             <div class="product-card">
                 <div class="product-name">${p.nombre} <span style="font-size:0.7em; color:#888;">${p.kilos.toFixed(2)}kg</span></div>
                 <div class="price-edit">$<input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">/kg</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
                     <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1kg</button>
                     <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2</button>
                     <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.125)">125g</button>
+                </div>
+                <div style="margin-top:8px; display:flex; gap:5px;">
+                    <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos (ej: 350)">
+                    <button class="btn-ok" onclick="agregarGramos('${p.id}')">OK</button>
                 </div>
             </div>
         `).join('');
@@ -161,12 +161,17 @@
         actualizarUI();
     }
 
+    function agregarGramos(id) {
+        const g = document.getElementById(`gr_${id}`).value;
+        if(g > 0) { agregarTicket(id, g/1000); document.getElementById(`gr_${id}`).value = ''; }
+    }
+
     function actualizarUI() {
         const list = document.getElementById('ticketList');
         let t = 0;
         list.innerHTML = ticket.map((item, i) => {
             t += item.subtotal;
-            return `<div class="ticket-item"><span>${item.nombre}</span><span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none;">&times;</button></span></div>`;
+            return `<div class="ticket-item"><span>${item.nombre} (${item.cantidad < 1 ? (item.cantidad*1000)+'g' : item.cantidad+'kg'})</span><span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></span></div>`;
         }).join('');
         document.getElementById('totalVenta').innerText = t.toFixed(2);
     }
