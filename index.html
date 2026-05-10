@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS Pro v1.9</title>
+    <title>RECAUDERIA - POS Gramos Fix</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -15,87 +15,64 @@
             --info: #0288d1;
         }
 
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: var(--bg); 
-            margin: 0; 
-            min-height: 100vh;
-            display: flex; 
-            flex-direction: column; 
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
         
-        header { 
-            background: var(--primary); color: white; padding: 10px 15px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 1000;
-        }
+        header { background: var(--primary); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
 
-        .main-layout { 
-            display: grid; 
-            grid-template-columns: 1fr 380px; 
-            gap: 15px; padding: 15px; 
-            flex: 1;
-        }
+        .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 15px; padding: 15px; flex: 1; }
 
-        .products-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-            gap: 15px; align-content: start;
-        }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; align-content: start; }
 
         .product-card { 
-            background: var(--white); border-radius: 12px; padding: 15px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd;
+            background: var(--white); border-radius: 15px; padding: 15px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #ddd;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
-        .product-name { font-weight: bold; color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .price-edit input { width: 70px; border: none; background: none; font-weight: bold; color: var(--accent); text-align: center; font-size: 1.1em; outline: none; }
-
-        .btn-qty { background: #f8f9fa; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; margin: 2px; font-weight: 600; }
+        .product-name { font-weight: bold; color: var(--primary); font-size: 1.2em; display: flex; justify-content: space-between; }
         
-        /* Estilo para el input de gramos */
-        .gramos-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9em; outline: none; }
-        .btn-ok { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 8px; text-align: center; }
+        .price-edit input { width: 80px; border: none; background: none; font-weight: bold; color: var(--accent); font-size: 1.1em; outline: none; text-align: center;}
 
-        .ticket-panel { 
-            background: var(--white); border-radius: 15px; display: flex; flex-direction: column; 
-            padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            height: fit-content; position: sticky; top: 70px;
+        /* BOTONES RÁPIDOS */
+        .qty-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 12px 5px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
+
+        /* SECCIÓN DE GRAMOS - DISEÑO REFORZADO */
+        .gramos-box { 
+            background: #e3f2fd; padding: 10px; border-radius: 10px; border: 1px solid #bbdefb;
+            display: flex; gap: 5px; align-items: center; margin-top: 5px;
         }
+        .gramos-input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #90caf9; font-size: 1em; outline: none; }
+        .btn-ok { background: var(--info); color: white; border: none; padding: 12px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* TICKET */
+        .ticket-panel { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 70px; }
         .ticket-list { max-height: 300px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
         .ticket-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1.1em; }
+        .total-section { font-size: 2em; font-weight: bold; text-align: right; color: var(--primary); padding: 15px 0; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 1.2em; cursor: pointer; }
 
+        /* MODALES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; width: 95%; max-width: 700px; max-height: 90vh; border-radius: 15px; padding: 20px; overflow-y: auto; }
+        .modal-content { background: white; width: 95%; max-width: 600px; border-radius: 15px; padding: 20px; }
         
-        .table-ventas { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .table-ventas th { background: #eee; padding: 8px; text-align: left; font-size: 0.85em; }
-        .table-ventas td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .btn-icon { border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: white; margin-left: 5px; }
 
-        .btn-icon { border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1em; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; margin-left: 5px; color: white; }
-        .btn-mod-icon { background-color: var(--info); }
-        .btn-can-icon { background-color: var(--danger); }
-
-        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; margin-left: 4px; font-size: 0.75em; text-decoration: none; }
+        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 0.8em; text-decoration: none; }
 
         @media (max-width: 800px) {
-            .main-layout { grid-template-columns: 1fr; padding: 10px; }
-            .ticket-panel { position: relative; top: 0; margin-bottom: 20px; order: -1; }
-            header { flex-wrap: wrap; gap: 10px; }
-            .nav-buttons { width: 100%; display: flex; justify-content: space-around; }
-            .nav-btn { flex: 1; text-align: center; }
+            .main-layout { grid-template-columns: 1fr; }
+            .ticket-panel { order: -1; position: relative; top: 0; margin-bottom: 20px; }
+            header { flex-wrap: wrap; gap: 10px; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <strong>🍎 RECAUDERIA</strong>
-    <div class="nav-buttons">
+    <strong>🍎 RECAUDERIA POS</strong>
+    <div style="display:flex; gap:5px;">
         <button class="nav-btn" onclick="abrirHistorialVentas()" style="background: var(--info);">📊 VENTAS</button>
         <button class="nav-btn" onclick="prepararCierreDiario()" style="background: var(--accent);">🌙 CIERRE</button>
         <a href="Registro.html" class="nav-btn">⚙️ CONFIG</a>
@@ -106,7 +83,7 @@
     <div class="products-grid" id="gridProductos"></div>
 
     <div class="ticket-panel">
-        <h3 style="margin:0">🛒 Ticket <span id="modoTicket" style="font-size:0.5em; color:var(--info); display:none;">(EDITANDO VENTA)</span></h3>
+        <h3 style="margin:0">🛒 Ticket <span id="modoTicket" style="font-size:0.5em; color:var(--info); display:none;">(EDITANDO)</span></h3>
         <div class="ticket-list" id="ticketList"></div>
         <div class="total-section">Total: $<span id="totalVenta">0.00</span></div>
         <button class="btn-confirm" onclick="finalizarVenta()">REGISTRAR VENTA</button>
@@ -116,7 +93,7 @@
 <div class="modal-overlay" id="modalUniversal">
     <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-            <h2 id="modalTitulo" style="margin:0; font-size: 1.2em; color:var(--primary);">Detalle</h2>
+            <h2 id="modalTitulo" style="margin:0; font-size: 1.2em;">Detalle</h2>
             <button onclick="cerrarModal()" style="background:none; border:none; font-size:2em; cursor:pointer;">&times;</button>
         </div>
         <div id="modalCuerpo" style="margin-top:15px;"></div>
@@ -126,23 +103,31 @@
 <script>
     let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
     let ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || [];
-    let historicoVentas = JSON.parse(localStorage.getItem('recauderia_historico')) || [];
     let ticket = [];
 
     function renderizarProductos() {
         const grid = document.getElementById('gridProductos');
-        if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos.</p>`; return; }
+        if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos registrados.</p>`; return; }
+        
         grid.innerHTML = productos.map(p => `
             <div class="product-card">
-                <div class="product-name">${p.nombre} <span style="font-size:0.7em; color:#888;">${p.kilos.toFixed(2)}kg</span></div>
-                <div class="price-edit">$<input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">/kg</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4</button>
+                <div class="product-name">
+                    ${p.nombre} 
+                    <span style="font-size:0.6em; color:#888;">Stock: ${p.kilos.toFixed(2)}kg</span>
                 </div>
-                <div style="margin-top:8px; display:flex; gap:5px;">
-                    <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos (ej: 350)">
+                
+                <div class="price-edit">
+                    $ <input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)"> / kg
+                </div>
+
+                <div class="qty-container">
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1 kg</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2 kg</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4 kg</button>
+                </div>
+
+                <div class="gramos-box">
+                    <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos (ej. 350)">
                     <button class="btn-ok" onclick="agregarGramos('${p.id}')">OK</button>
                 </div>
             </div>
@@ -162,8 +147,14 @@
     }
 
     function agregarGramos(id) {
-        const g = document.getElementById(`gr_${id}`).value;
-        if(g > 0) { agregarTicket(id, g/1000); document.getElementById(`gr_${id}`).value = ''; }
+        const gInput = document.getElementById(`gr_${id}`);
+        const g = parseFloat(gInput.value);
+        if(g > 0) { 
+            agregarTicket(id, g/1000); 
+            gInput.value = ''; 
+        } else {
+            alert("Ingresa una cantidad de gramos válida");
+        }
     }
 
     function actualizarUI() {
@@ -171,55 +162,63 @@
         let t = 0;
         list.innerHTML = ticket.map((item, i) => {
             t += item.subtotal;
-            return `<div class="ticket-item"><span>${item.nombre} (${item.cantidad < 1 ? (item.cantidad*1000)+'g' : item.cantidad+'kg'})</span><span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></span></div>`;
+            const pesoStr = item.cantidad < 1 ? (item.cantidad*1000)+'g' : item.cantidad+'kg';
+            return `<div class="ticket-item">
+                <span><strong>${item.nombre}</strong> (${pesoStr})</span>
+                <span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none; cursor:pointer;">&times;</button></span>
+            </div>`;
         }).join('');
         document.getElementById('totalVenta').innerText = t.toFixed(2);
     }
 
     function finalizarVenta() {
         if(ticket.length === 0) return;
-        const v = { id: Date.now(), items: [...ticket], total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-        ticket.forEach(item => { const idx = productos.findIndex(p => p.id === item.id); if(idx !== -1) productos[idx].kilos -= item.cantidad; });
+        const v = { id: Date.now(), total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: [...ticket] };
+        ticket.forEach(item => {
+            const idx = productos.findIndex(p => p.id === item.id);
+            if(idx !== -1) productos[idx].kilos -= item.cantidad;
+        });
         ventasHoy.unshift(v);
         localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        ticket = []; document.getElementById('modoTicket').style.display='none'; actualizarUI(); renderizarProductos();
+        ticket = []; actualizarUI(); renderizarProductos();
+        alert("Venta guardada");
     }
 
     function abrirHistorialVentas() {
         document.getElementById('modalTitulo').innerText = "Ventas de Hoy";
         const cuerpo = document.getElementById('modalCuerpo');
-        if(ventasHoy.length === 0) { cuerpo.innerHTML = "<p style='text-align:center;'>No hay ventas.</p>"; } 
+        if(ventasHoy.length === 0) { cuerpo.innerHTML = "<p>No hay ventas.</p>"; }
         else {
-            let html = `<table class="table-ventas"><thead><tr><th>Hora</th><th>Total</th><th style="text-align:right;">Acción</th></tr></thead><tbody>`;
+            let h = `<table style="width:100%; border-collapse:collapse;"><thead><tr style="background:#eee;"><th>Hora</th><th>Total</th><th style="text-align:right;">Acción</th></tr></thead><tbody>`;
             ventasHoy.forEach(v => {
-                html += `<tr><td>${v.hora}</td><td><strong>$${v.total.toFixed(2)}</strong></td><td style="text-align:right; white-space:nowrap;">
-                    <button class="btn-icon btn-mod-icon" onclick="modificarVenta(${v.id})">✏️</button>
-                    <button class="btn-icon btn-can-icon" onclick="cancelarVenta(${v.id})">🗑️</button>
+                h += `<tr style="border-bottom:1px solid #eee;"><td>${v.hora}</td><td>$${v.total.toFixed(2)}</td><td style="text-align:right; padding:5px;">
+                    <button class="btn-icon" style="background:var(--info)" onclick="modificarVenta(${v.id})">✏️</button>
+                    <button class="btn-icon" style="background:var(--danger)" onclick="cancelarVenta(${v.id})">🗑️</button>
                 </td></tr>`;
             });
-            html += `</tbody></table>`;
-            cuerpo.innerHTML = html;
+            h += `</tbody></table>`;
+            cuerpo.innerHTML = h;
         }
         document.getElementById('modalUniversal').style.display = 'flex';
     }
 
-    function modificarVenta(ventaId) {
-        const idx = ventasHoy.findIndex(v => v.id === ventaId);
-        const venta = ventasHoy[idx];
-        venta.items.forEach(item => { const pIdx = productos.findIndex(p => p.id === item.id); if(pIdx !== -1) productos[pIdx].kilos += item.cantidad; });
-        ticket = [...venta.items];
+    function modificarVenta(id) {
+        const idx = ventasHoy.findIndex(v => v.id === id);
+        const v = ventasHoy[idx];
+        v.items.forEach(i => { const pIdx = productos.findIndex(p => p.id === i.id); if(pIdx !== -1) productos[pIdx].kilos += i.cantidad; });
+        ticket = [...v.items];
         ventasHoy.splice(idx, 1);
         localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        renderizarProductos(); actualizarUI(); cerrarModal();
+        actualizarUI(); renderizarProductos(); cerrarModal();
         document.getElementById('modoTicket').style.display = 'inline';
     }
 
-    function cancelarVenta(ventaId) {
-        if(!confirm("¿Regresar stock y borrar venta?")) return;
-        const idx = ventasHoy.findIndex(v => v.id === ventaId);
-        ventasHoy[idx].items.forEach(item => { const pIdx = productos.findIndex(p => p.id === item.id); if(pIdx !== -1) productos[pIdx].kilos += item.cantidad; });
+    function cancelarVenta(id) {
+        if(!confirm("¿Regresar stock?")) return;
+        const idx = ventasHoy.findIndex(v => v.id === id);
+        ventasHoy[idx].items.forEach(i => { const pIdx = productos.findIndex(p => p.id === i.id); if(pIdx !== -1) productos[pIdx].kilos += i.cantidad; });
         ventasHoy.splice(idx, 1);
         localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
@@ -227,17 +226,10 @@
     }
 
     function prepararCierreDiario() {
-        const total = ventasHoy.reduce((a,b)=>a+b.total, 0);
-        document.getElementById('modalTitulo').innerText = "Cierre de Turno";
-        document.getElementById('modalCuerpo').innerHTML = `<h3>Efectivo en caja: $${total.toFixed(2)}</h3><button class="btn-confirm" onclick="ejecutarCierre()">CONFIRMAR CIERRE</button>`;
+        const t = ventasHoy.reduce((a,b)=>a+b.total, 0);
+        document.getElementById('modalTitulo').innerText = "Cierre";
+        document.getElementById('modalCuerpo').innerHTML = `<h2>Total: $${t.toFixed(2)}</h2><button class="btn-confirm" onclick="ventasHoy=[]; localStorage.removeItem('recauderia_ventas'); location.reload();">CERRAR DÍA</button>`;
         document.getElementById('modalUniversal').style.display = 'flex';
-    }
-
-    function ejecutarCierre() {
-        historicoVentas.push({ fecha: new Date().toLocaleDateString(), total: ventasHoy.reduce((a,b)=>a+b.total, 0) });
-        localStorage.setItem('recauderia_historico', JSON.stringify(historicoVentas));
-        ventasHoy = []; localStorage.removeItem('recauderia_ventas');
-        location.reload();
     }
 
     function cerrarModal() { document.getElementById('modalUniversal').style.display = 'none'; }
