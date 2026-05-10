@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS Seguridad v1.9.3</title>
+    <title>RECAUDERIA - POS Pro v2.0</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -13,49 +13,53 @@
             --white: #ffffff;
             --danger: #c62828;
             --info: #0288d1;
+            --promo: #ff9800;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
         header { background: var(--primary); color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        
         .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 15px; padding: 15px; flex: 1; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; align-content: start; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; align-content: start; }
 
         .product-card { 
             background: var(--white); border-radius: 15px; padding: 15px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #ddd;
-            display: flex; flex-direction: column; gap: 10px;
-            box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;
         }
 
         .product-name { font-weight: bold; color: var(--primary); font-size: 1.1em; display: flex; justify-content: space-between; }
-        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 8px; text-align: center; font-size: 0.9em; }
-        .price-edit input { width: 60px; border: none; background: none; font-weight: bold; color: var(--accent); outline: none; text-align: center; }
+        
+        /* FILA DE PRECIO Y PROMO */
+        .price-row { display: grid; grid-template-columns: 1fr 45px; gap: 5px; align-items: center; }
+        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 6px; border-radius: 8px; text-align: center; font-size: 0.9em; }
+        .price-edit input { width: 55px; border: none; background: none; font-weight: bold; color: var(--accent); outline: none; text-align: center; }
+        
+        .btn-promo { background: var(--promo); color: white; border: none; height: 35px; border-radius: 8px; cursor: pointer; font-size: 1.1em; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .btn-promo:hover { transform: scale(1.05); filter: brightness(1.1); }
 
-        .qty-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 10px 2px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85em; }
+        /* BOTONES DE PESO EN UNA FILA */
+        .qty-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+        .btn-qty { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 2px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8em; }
 
+        /* GRAMOS COMPACTO */
         .gramos-box { 
-            background: #e3f2fd; padding: 8px; border-radius: 10px; border: 1px solid #bbdefb;
-            display: grid; grid-template-columns: 1fr 50px; gap: 8px; align-items: center; box-sizing: border-box;
+            background: #e3f2fd; padding: 6px; border-radius: 8px; border: 1px solid #bbdefb;
+            display: grid; grid-template-columns: 1fr 40px; gap: 5px; box-sizing: border-box;
         }
-        .gramos-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #90caf9; font-size: 0.95em; outline: none; box-sizing: border-box; }
-        .btn-ok { background: var(--info); color: white; border: none; height: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; }
+        .gramos-input { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #90caf9; font-size: 0.9em; outline: none; box-sizing: border-box; }
+        .btn-ok { background: var(--info); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; }
 
-        /* TICKET */
+        /* TICKET Y OTROS */
         .ticket-panel { background: var(--white); border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 70px; }
-        
-        /* Alerta visual de edición */
-        .edit-warning { background: #fff3e0; border: 2px solid var(--accent); }
-        
         .ticket-list { max-height: 300px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
-        .ticket-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .ticket-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9em; }
         .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
         .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
 
-        /* MODALES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; width: 95%; max-width: 500px; border-radius: 15px; padding: 20px; }
-        .btn-icon { border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: white; margin-left: 5px; font-size: 1.1em;}
+        .btn-icon { border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: white; margin-left: 5px; }
 
         .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; font-size: 0.75em; }
 
@@ -70,7 +74,7 @@
 <body>
 
 <header>
-    <strong>🍎 RECAUDERIA</strong>
+    <strong>🍎 RECAUDERIA POS v2.0</strong>
     <div style="display:flex; gap:5px;">
         <button class="nav-btn" onclick="abrirHistorialVentas()" style="background: var(--info);">📊 VENTAS</button>
         <button class="nav-btn" onclick="prepararCierreDiario()" style="background: var(--accent);">🌙 CIERRE</button>
@@ -80,13 +84,11 @@
 
 <div class="main-layout">
     <div class="products-grid" id="gridProductos"></div>
-    
-    <div class="ticket-panel" id="panelTicket">
-        <h3 style="margin:0">🛒 Ticket <span id="modoTicket" style="font-size:0.5em; color:var(--accent); display:none;">(MODO EDICIÓN)</span></h3>
+    <div class="ticket-panel">
+        <h3 style="margin:0">🛒 Ticket <span id="modoTicket" style="font-size:0.5em; color:var(--accent); display:none;">(EDICIÓN)</span></h3>
         <div class="ticket-list" id="ticketList"></div>
         <div class="total-section">Total: $<span id="totalVenta">0.00</span></div>
-        <button class="btn-confirm" id="btnFinalizar" onclick="finalizarVenta()">REGISTRAR VENTA</button>
-        <button id="btnDescartar" onclick="descartarCambios()" style="display:none; width:100%; background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; font-weight:bold;">DESCARTAR CAMBIOS</button>
+        <button class="btn-confirm" onclick="finalizarVenta()">REGISTRAR VENTA</button>
     </div>
 </div>
 
@@ -104,27 +106,55 @@
     let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
     let ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || [];
     let ticket = [];
-    let editandoVentaActiva = false;
-    let respaldoVentaOriginal = null;
 
     function renderizarProductos() {
         const grid = document.getElementById('gridProductos');
-        if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos.</p>`; return; }
+        if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos registrados.</p>`; return; }
+        
         grid.innerHTML = productos.map(p => `
             <div class="product-card">
-                <div class="product-name">${p.nombre} <span style="font-size:0.6em; color:#888;">${p.kilos.toFixed(2)}kg</span></div>
-                <div class="price-edit">$ <input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)"> / kg</div>
-                <div class="qty-container">
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1 kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2 kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4 kg</button>
+                <div class="product-name">
+                    ${p.nombre} 
+                    <span style="font-size:0.65em; color:#888;">${p.kilos.toFixed(2)}kg</span>
                 </div>
+                
+                <div class="price-row">
+                    <div class="price-edit">
+                        $ <input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)"> / kg
+                    </div>
+                    <button class="btn-promo" title="Promoción" onclick="aplicarPromocion('${p.id}')">⭐</button>
+                </div>
+
+                <div class="qty-row">
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1kg</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4</button>
+                </div>
+
                 <div class="gramos-box">
                     <input type="number" id="gr_${p.id}" class="gramos-input" placeholder="Gramos">
                     <button class="btn-ok" onclick="agregarGramos('${p.id}')">OK</button>
                 </div>
             </div>
         `).join('');
+    }
+
+    function aplicarPromocion(id) {
+        const p = productos.find(prod => prod.id.toString() === id.toString());
+        const desc = prompt(`Aplicar precio especial para ${p.nombre}. Precio actual: $${p.precioVenta}\n¿Cuál será el nuevo precio para esta venta?`);
+        if(desc && !isNaN(desc)) {
+            const tempPrice = parseFloat(desc);
+            const cant = prompt(`¿Cuántos kilos?`, "1");
+            if(cant && !isNaN(cant)) {
+                ticket.push({ 
+                    id: p.id, 
+                    nombre: p.nombre + " (PROMO)", 
+                    cantidad: parseFloat(cant), 
+                    subtotal: tempPrice * parseFloat(cant) 
+                });
+                actualizarUI();
+            }
+        }
     }
 
     function actualizarPrecio(id, valor) {
@@ -159,24 +189,14 @@
     function finalizarVenta() {
         if(ticket.length === 0) return;
         const v = { id: Date.now(), total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: [...ticket] };
-        
-        ticket.forEach(item => {
-            const idx = productos.findIndex(p => p.id === item.id);
-            if(idx !== -1) productos[idx].kilos -= item.cantidad;
-        });
-
+        ticket.forEach(item => { const idx = productos.findIndex(p => p.id === item.id); if(idx !== -1) productos[idx].kilos -= item.cantidad; });
         ventasHoy.unshift(v);
-        limpiarEstadoEdicion();
-        guardarTodo();
-        renderizarProductos();
-        alert("Venta procesada correctamente.");
+        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
+        ticket = []; actualizarUI(); renderizarProductos();
     }
 
     function abrirHistorialVentas() {
-        if(editandoVentaActiva) {
-            alert("⚠️ Tienes una edición pendiente. Termina o descarta los cambios antes de abrir otra venta.");
-            return;
-        }
         document.getElementById('modalTitulo').innerText = "Ventas de Hoy";
         const cuerpo = document.getElementById('modalCuerpo');
         if(ventasHoy.length === 0) { cuerpo.innerHTML = "<p>No hay ventas.</p>"; }
@@ -197,71 +217,28 @@
     function modificarVenta(id) {
         const idx = ventasHoy.findIndex(v => v.id === id);
         const v = ventasHoy[idx];
-
-        // RESPALDO DE SEGURIDAD
-        respaldoVentaOriginal = JSON.parse(JSON.stringify(v));
-        editandoVentaActiva = true;
-
-        // Devolver stock
         v.items.forEach(i => { const pIdx = productos.findIndex(p => p.id === i.id); if(pIdx !== -1) productos[pIdx].kilos += i.cantidad; });
-        
         ticket = [...v.items];
         ventasHoy.splice(idx, 1);
-        
-        actualizarUI(); 
-        renderizarProductos(); 
-        cerrarModal();
-
-        // Estilos de alerta
-        document.getElementById('modoTicket').style.display = 'inline';
-        document.getElementById('btnDescartar').style.display = 'block';
-        document.getElementById('panelTicket').classList.add('edit-warning');
-        document.getElementById('btnFinalizar').innerText = "GUARDAR CAMBIOS";
-    }
-
-    function descartarCambios() {
-        if(!confirm("¿Descartar cambios? La venta regresará al historial como estaba originalmente.")) return;
-        
-        // Regresamos stock de lo que estaba en el ticket (porque lo sacamos antes)
-        ticket.forEach(i => { const pIdx = productos.findIndex(p => p.id === i.id); if(pIdx !== -1) productos[pIdx].kilos -= i.cantidad; });
-
-        // Reinsertamos la venta original
-        ventasHoy.unshift(respaldoVentaOriginal);
-        limpiarEstadoEdicion();
-        guardarTodo();
-        renderizarProductos();
-    }
-
-    function limpiarEstadoEdicion() {
-        ticket = [];
-        editandoVentaActiva = false;
-        respaldoVentaOriginal = null;
-        document.getElementById('modoTicket').style.display = 'none';
-        document.getElementById('btnDescartar').style.display = 'none';
-        document.getElementById('panelTicket').classList.remove('edit-warning');
-        document.getElementById('btnFinalizar').innerText = "REGISTRAR VENTA";
-        actualizarUI();
+        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
+        actualizarUI(); renderizarProductos(); cerrarModal();
     }
 
     function cancelarVenta(id) {
-        if(!confirm("¿Regresar stock y borrar definitivamente?")) return;
+        if(!confirm("¿Regresar stock?")) return;
         const idx = ventasHoy.findIndex(v => v.id === id);
         ventasHoy[idx].items.forEach(i => { const pIdx = productos.findIndex(p => p.id === i.id); if(pIdx !== -1) productos[pIdx].kilos += i.cantidad; });
         ventasHoy.splice(idx, 1);
-        guardarTodo();
+        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
         renderizarProductos(); abrirHistorialVentas();
     }
 
-    function guardarTodo() {
-        localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
-        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-    }
-
     function prepararCierreDiario() {
-        if(editandoVentaActiva) return alert("Primero termina la edición actual.");
         const t = ventasHoy.reduce((a,b)=>a+b.total, 0);
         document.getElementById('modalTitulo').innerText = "Cierre";
-        document.getElementById('modalCuerpo').innerHTML = `<h3>Efectivo: $${t.toFixed(2)}</h3><button class="btn-confirm" onclick="ventasHoy=[]; localStorage.removeItem('recauderia_ventas'); location.reload();">TERMINAR DÍA</button>`;
+        document.getElementById('modalCuerpo').innerHTML = `<h3>Total: $${t.toFixed(2)}</h3><button class="btn-confirm" onclick="ventasHoy=[]; localStorage.removeItem('recauderia_ventas'); location.reload();">TERMINAR DÍA</button>`;
         document.getElementById('modalUniversal').style.display = 'flex';
     }
 
