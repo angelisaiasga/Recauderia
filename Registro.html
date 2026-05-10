@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECAUDERIA - Auditoría Activa</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #81c784;
+            --bg: #f8f9fa;
+            --text: #212529;
+            --accent: #f57c00;
+            --danger: #d32f2f;
+            --info: #0288d1;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 10px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        header { 
+            background: var(--primary); color: white; padding: 20px; 
+            border-radius: 15px; text-align: center; margin-bottom: 20px; position: relative; 
+        }
+        
+        .btn-back { position: absolute; left: 20px; top: 25px; color: white; text-decoration: none; font-weight: bold; }
+
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+
+        .input-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.75rem; font-weight: bold; color: #666; }
+
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; box-sizing: border-box; }
+        input:disabled { background: #eee; }
+
+        button { border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-main { background: var(--primary); color: white; padding: 0 25px; height: 45px; min-width: 180px; }
+        .btn-edit-row { background: var(--accent); color: white; padding: 8px 12px; font-size: 0.85em; }
+        .btn-delete { background: var(--danger); color: white; padding: 8px 12px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: var(--secondary); color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+
+        /* ESTILOS BITÁCORA */
+        .log-container { max-height: 200px; overflow-y: auto; background: #eee; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.8em; }
+        .log-entry { border-bottom: 1px solid #ddd; padding: 5px 0; }
+        .log-tag { font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; font-size: 0.9em; margin-right: 5px; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; padding: 30px; border-radius: 15px; max-width: 450px; width: 90%; text-align: center; }
+        .modal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-modal { padding: 15px; font-size: 0.85em; color: white; }
+
+        @media (max-width: 800px) { .input-grid { grid-template-columns: 1fr 1fr; } .btn-main { grid-column: span 2; width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="btn-back">← Dashboard</a>
+        <h1>⚙️ GESTIÓN Y AUDITORÍA</h1>
+    </header>
+
+    <div class="card" id="cardCaptura">
+        <div class="input-grid">
+            <div class="form-group">
+                <label>Producto</label>
+                <input type="text" id="pNombre" placeholder="Nombre">
+            </div>
+            <div class="form-group"><label id="lblKilos">Kilos</label><input type="number" id="pKilos" step="0.1"></div>
+            <div class="form-group"><label id="lblCosto">Inversión ($)</label><input type="number" id="pCostoTotal"></div>
+            <div class="form-group"><label>Venta ($/Kg)</label><input type="number" id="pVenta"></div>
+            <button class="btn-main" id="btnAccion" onclick="procesarAccion()">AÑADIR</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Stock (Kg)</th>
+                    <th>Inversión</th>
+                    <th>Costo Prom.</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="listaProductos"></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>📜 Bitácora de Movimientos (Hoy)</h3>
+        <div class="log-container" id="bitacora">
+            </div>
+        <button onclick="borrarBitacora()" style="margin-top:10px; background:#999; color:white; padding:5px 10px; font-size:0.7em;">Limpiar Historial</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalDecision">
+    <div class="modal">
+        <h2 id="modalTitle">Producto</h2>
+        <div class="modal-buttons">
+            <button class="btn-modal" style="background: var(--primary);" onclick="configurarCaptura('sumar')">AGREGAR COMPRA</button>
+            <button class="btn-modal" style="background: var(--accent);" onclick="configurarCaptura('corregir')">CORREGIR DATOS</button>
+            <button class="btn-modal" style="background: var(--danger);" onclick="manejarMerma()">REGISTRAR MERMA</button>
+            <button class="btn-modal" style="background: var(--info);" onclick="configurarCaptura('rematar')">REMATE/OTROS</button>
+        </div>
+        <button onclick="cerrarModal()" style="margin-top:20px; background:none; border:none; text-decoration:underline;">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
+    let logs = JSON.parse(localStorage.getItem('recauderia_logs')) || [];
+    let editandoID = null;
+    let modoOperacion = 'nuevo';
+
+    function registrarLog(accion, producto, detalle) {
+        const entry = {
+            fecha: new Date().toLocaleString(),
+            accion,
+            producto,
+            detalle
+        };
+        logs.unshift(entry); // El más reciente arriba
+        localStorage.setItem('recauderia_logs', JSON.stringify(logs.slice(0, 50))); // Guardamos últimos 50
+        renderizarBitacora();
+    }
+
+    function procesarAccion() {
+        const nombre = document.getElementById('pNombre').value.trim();
+        const kilos = parseFloat(document.getElementById('pKilos').value) || 0;
+        const costo = parseFloat(document.getElementById('pCostoTotal').value) || 0;
+        const venta = parseFloat(document.getElementById('pVenta').value) || 0;
+
+        if (!nombre) return;
+
+        if (editandoID !== null) {
+            const idx = productos.findIndex(p => p.id === editandoID);
+            const pViejo = {...productos[idx]};
+            
+            if (modoOperacion === 'sumar') {
+                productos[idx].kilos += kilos;
+                productos[idx].costoTotal += costo;
+                registrarLog("COMPRA", nombre, `Agregó ${kilos}kg ($${costo}). Stock final: ${productos[idx].kilos}kg`);
+            } else {
+                productos[idx].kilos = kilos;
+                productos[idx].costoTotal = costo;
+                registrarLog("CORRECCIÓN", nombre, `Manual: ${pViejo.kilos}kg -> ${kilos}kg | $${pViejo.costoTotal} -> $${costo}`);
+            }
+            productos[idx].precioVenta = venta;
+            cancelarEdicion();
+        } else {
+            productos.push({ id: Date.now(), nombre, kilos, costoTotal: costo, precioVenta: venta });
+            registrarLog("ALTA", nombre, `Nuevo producto con ${kilos}kg.`);
+        }
+        guardarYRefrescar();
+    }
+
+    function manejarMerma() {
+        const prod = productos.find(p => p.id === editandoID);
+        const kilosPillados = parseFloat(prompt(`¿Kilos a tirar de ${prod.nombre}?`));
+        if (kilosPillados > 0 && kilosPillados <= prod.kilos) {
+            const idx = productos.findIndex(p => p.id === editandoID);
+            productos[idx].kilos -= kilosPillados;
+            registrarLog("MERMA", prod.nombre, `Se tiraron ${kilosPillados}kg. Stock restante: ${productos[idx].kilos}kg`);
+            cerrarModal();
+            guardarYRefrescar();
+        }
+    }
+
+    function configurarCaptura(modo) {
+        const prod = productos.find(p => p.id === editandoID);
+        modoOperacion = modo;
+        cerrarModal();
+        document.getElementById('pNombre').value = prod.nombre;
+        document.getElementById('pNombre').disabled = true;
+        document.getElementById('btnAccion').innerText = "CONFIRMAR " + modo.toUpperCase();
+        document.getElementById('btnAccion').style.background = "var(--accent)";
+        document.getElementById('pKilos').value = (modo === 'sumar') ? '' : prod.kilos;
+        document.getElementById('pCostoTotal').value = (modo === 'sumar') ? '' : prod.costoTotal;
+        document.getElementById('pVenta').value = prod.precioVenta;
+    }
+
+    function cancelarEdicion() {
+        editandoID = null;
+        document.getElementById('pNombre').disabled = false;
+        document.getElementById('btnAccion').innerText = "AÑADIR";
+        document.getElementById('btnAccion').style.background = "var(--primary)";
+        limpiarCampos();
+    }
+
+    function guardarYRefrescar() {
+        localStorage.setItem('recauderia_prods', JSON.stringify(productos));
+        renderizarTabla();
+    }
+
+    function renderizarTabla() {
+        const tbody = document.getElementById('listaProductos');
+        tbody.innerHTML = '';
+        productos.forEach(p => {
+            const cp = p.kilos > 0 ? (p.costoTotal / p.kilos).toFixed(2) : 0;
+            tbody.innerHTML += `<tr>
+                <td><strong>${p.nombre}</strong></td>
+                <td>${p.kilos.toFixed(2)} Kg</td>
+                <td>$${p.costoTotal.toFixed(2)}</td>
+                <td style="color:#888">$${cp}/Kg</td>
+                <td style="text-align: right;">
+                    <button class="btn-edit-row" onclick="abrirDecision(${p.id})">ACTUALIZAR</button>
+                    <button class="btn-delete" onclick="eliminarProducto(${p.id})">×</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function renderizarBitacora() {
+        const container = document.getElementById('bitacora');
+        container.innerHTML = logs.map(l => `
+            <div class="log-entry">
+                <span style="color:#999">[${l.fecha}]</span> 
+                <span class="log-tag" style="color:${getColor(l.accion)}">${l.accion}</span> 
+                <strong>${l.producto}</strong>: ${l.detalle}
+            </div>
+        `).join('');
+    }
+
+    function getColor(acc) {
+        if(acc === 'MERMA') return 'var(--danger)';
+        if(acc === 'CORRECCIÓN') return 'var(--accent)';
+        if(acc === 'COMPRA') return 'var(--primary)';
+        return '#666';
+    }
+
+    function abrirDecision(id) { editandoID = id; document.getElementById('modalDecision').style.display = 'flex'; }
+    function cerrarModal() { document.getElementById('modalDecision').style.display = 'none'; }
+    function limpiarCampos() { ['pNombre', 'pKilos', 'pCostoTotal', 'pVenta'].forEach(i => document.getElementById(i).value = ''); }
+    function eliminarProducto(id) { if(confirm("¿Eliminar?")) { productos = productos.filter(p => p.id !== id); guardarYRefrescar(); } }
+    function borrarBitacora() { if(confirm("¿Limpiar historial?")) { logs = []; localStorage.removeItem('recauderia_logs'); renderizarBitacora(); } }
+
+    window.onload = () => { renderizarTabla(); renderizarBitacora(); };
+</script>
+</body>
+</html>
