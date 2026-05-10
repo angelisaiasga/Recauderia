@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECAUDERIA - POS Pro v1.6</title>
+    <title>RECAUDERIA - POS v1.7</title>
     <style>
         :root {
             --primary: #2e7d32;
@@ -15,7 +15,6 @@
             --info: #0288d1;
         }
 
-        /* CORRECCIÓN DE SCROLL PARA MÓVIL */
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: var(--bg); 
@@ -26,7 +25,7 @@
         }
         
         header { 
-            background: var(--primary); color: white; padding: 12px 20px; 
+            background: var(--primary); color: white; padding: 10px 15px; 
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: sticky; top: 0; z-index: 1000;
@@ -39,66 +38,65 @@
             flex: 1;
         }
 
-        /* PANEL DE PRODUCTOS RESPONSIVO */
+        /* PRODUCTOS */
         .products-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-            gap: 15px; 
-            align-content: start;
+            gap: 15px; align-content: start;
         }
 
         .product-card { 
             background: var(--white); border-radius: 12px; padding: 15px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column;
-            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd;
         }
 
         .product-name { font-weight: bold; color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .stock-tag { font-size: 0.75em; color: #888; background: #eee; padding: 2px 6px; border-radius: 4px; }
-
-        .price-edit { 
-            background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 6px; 
-            margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
+        .price-edit { background: #fff8e1; border: 1px solid #ffe082; padding: 8px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .price-edit input { width: 70px; border: none; background: none; font-weight: bold; color: var(--accent); text-align: center; font-size: 1.1em; outline: none; }
 
-        .btn-qty { 
-            background: #f8f9fa; border: 1px solid #ccc; padding: 10px; border-radius: 8px; 
-            cursor: pointer; font-size: 0.9em; margin: 2px; transition: 0.2s; font-weight: 600;
-        }
-        .btn-qty:hover { background: var(--secondary); color: white; border-color: var(--primary); }
+        .btn-qty { background: #f8f9fa; border: 1px solid #ccc; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9em; margin: 2px; font-weight: 600; }
 
         /* TICKET */
         .ticket-panel { 
             background: var(--white); border-radius: 15px; display: flex; flex-direction: column; 
             padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            height: fit-content; position: sticky; top: 80px;
+            height: fit-content; position: sticky; top: 70px;
         }
-        .ticket-list { max-height: 400px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 5px; }
-        .ticket-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.95em; }
-        .total-section { font-size: 2em; font-weight: bold; text-align: right; color: var(--primary); padding: 15px 0; }
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1.2em; }
+        .ticket-list { max-height: 300px; overflow-y: auto; border-top: 1px dashed #ccc; margin-top: 10px; }
+        .ticket-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .total-section { font-size: 1.8em; font-weight: bold; text-align: right; color: var(--primary); padding: 10px 0; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1.1em; }
 
-        /* MODALES */
+        /* MODALES CORREGIDOS PARA MÓVIL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; width: 95%; max-width: 700px; max-height: 85vh; border-radius: 15px; padding: 25px; overflow-y: auto; }
+        .modal-content { 
+            background: white; width: 95%; max-width: 700px; max-height: 90vh; 
+            border-radius: 15px; padding: 20px; overflow-y: auto; 
+        }
         
-        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; margin-left: 5px; font-size: 0.85em; text-decoration: none; }
+        .table-ventas { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+        .table-ventas th { background: #eee; padding: 8px; text-align: left; }
+        .table-ventas td { padding: 8px; border-bottom: 1px solid #eee; }
 
-        /* AJUSTES MÓVIL CRÍTICOS */
+        .nav-btn { background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; margin-left: 4px; font-size: 0.75em; text-decoration: none; }
+        .btn-cancelar { background: var(--danger); color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; }
+
         @media (max-width: 800px) {
             .main-layout { grid-template-columns: 1fr; padding: 10px; }
-            .ticket-panel { position: relative; top: 0; margin-bottom: 20px; order: -1; } /* El ticket sale primero en móvil */
-            .products-grid { grid-template-columns: 1fr; }
+            .ticket-panel { position: relative; top: 0; margin-bottom: 20px; order: -1; }
+            header { flex-wrap: wrap; gap: 10px; }
+            .nav-buttons { width: 100%; display: flex; justify-content: space-around; }
+            .nav-btn { flex: 1; text-align: center; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <strong>🍎 RECAUDERIA POS</strong>
-    <div style="display:flex;">
+    <strong>🍎 RECAUDERIA</strong>
+    <div class="nav-buttons">
         <button class="nav-btn" onclick="abrirHistorialVentas()" style="background: var(--info);">📊 VENTAS</button>
+        <button class="nav-btn" onclick="prepararCierreDiario()" style="background: var(--accent);">🌙 CIERRE</button>
         <a href="Registro.html" class="nav-btn">⚙️ CONFIG</a>
     </div>
 </header>
@@ -107,19 +105,18 @@
     <div class="products-grid" id="gridProductos"></div>
 
     <div class="ticket-panel">
-        <h3 style="margin:0">🛒 Ticket de Venta <span id="modoTicket" style="font-size:0.5em; color:var(--info); display:none;">(EDITANDO VENTA)</span></h3>
+        <h3 style="margin:0">🛒 Ticket <span id="modoTicket" style="font-size:0.5em; color:var(--info); display:none;">(EDITANDO)</span></h3>
         <div class="ticket-list" id="ticketList"></div>
         <div class="total-section">Total: $<span id="totalVenta">0.00</span></div>
         <button class="btn-confirm" onclick="finalizarVenta()">REGISTRAR VENTA</button>
-        <button onclick="limpiarTicket()" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-top:10px; font-weight:bold;">Vaciar Ticket</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="modalUniversal">
     <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom: 10px;">
-            <h2 id="modalTitulo" style="margin:0; color:var(--primary);">Historial</h2>
-            <button onclick="cerrarModal()" style="background:none; border:none; font-size:2em; cursor:pointer; color:#999;">&times;</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+            <h2 id="modalTitulo" style="margin:0; font-size: 1.2em; color:var(--primary);">Detalle</h2>
+            <button onclick="cerrarModal()" style="background:none; border:none; font-size:2em; cursor:pointer;">&times;</button>
         </div>
         <div id="modalCuerpo" style="margin-top:15px;"></div>
     </div>
@@ -128,35 +125,21 @@
 <script>
     let productos = JSON.parse(localStorage.getItem('recauderia_prods')) || [];
     let ventasHoy = JSON.parse(localStorage.getItem('recauderia_ventas')) || [];
+    let historicoVentas = JSON.parse(localStorage.getItem('recauderia_historico')) || [];
     let ticket = [];
 
     function renderizarProductos() {
         const grid = document.getElementById('gridProductos');
-        if (productos.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#666;">No hay productos. Registra mercancía en Configuración.</div>`;
-            return;
-        }
-
+        if (productos.length === 0) { grid.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay productos registrados.</p>`; return; }
         grid.innerHTML = productos.map(p => `
             <div class="product-card">
-                <div class="product-name">
-                    ${p.nombre} 
-                    <span class="stock-tag">${p.kilos.toFixed(2)} kg</span>
-                </div>
-                <div class="price-edit">
-                    <label>$</label>
-                    <input type="number" step="0.1" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">
-                    <small>/ Kg</small>
-                </div>
+                <div class="product-name">${p.nombre} <span style="font-size:0.7em; color:#888;">${p.kilos.toFixed(2)}kg</span></div>
+                <div class="price-edit">$<input type="number" value="${p.precioVenta}" onchange="actualizarPrecio('${p.id}', this.value)">/kg</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1 kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2 kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4 kg</button>
-                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.125)">125 g</button>
-                </div>
-                <div style="margin-top:8px; display:flex; gap:5px;">
-                    <input type="number" id="gr_${p.id}" placeholder="Gramos" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc;">
-                    <button class="btn-qty" style="background:var(--primary); color:white; border:none;" onclick="agregarGramos('${p.id}')">OK</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 1)">1kg</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.5)">1/2</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.25)">1/4</button>
+                    <button class="btn-qty" onclick="agregarTicket('${p.id}', 0.125)">125g</button>
                 </div>
             </div>
         `).join('');
@@ -174,99 +157,66 @@
         actualizarUI();
     }
 
-    function agregarGramos(id) {
-        const val = document.getElementById(`gr_${id}`).value;
-        if(val > 0) { agregarTicket(id, val/1000); document.getElementById(`gr_${id}`).value = ''; }
-    }
-
     function actualizarUI() {
         const list = document.getElementById('ticketList');
-        let totalTicket = 0;
+        let t = 0;
         list.innerHTML = ticket.map((item, i) => {
-            totalTicket += item.subtotal;
-            return `<div class="ticket-item">
-                <span><strong>${item.nombre}</strong><br><small>${item.cantidad >= 1 ? item.cantidad+'kg' : (item.cantidad*1000)+'g'}</small></span>
-                <span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold;">&times;</button></span>
-            </div>`;
+            t += item.subtotal;
+            return `<div class="ticket-item"><span>${item.nombre}</span><span>$${item.subtotal.toFixed(2)} <button onclick="ticket.splice(${i},1); actualizarUI()" style="color:red; border:none; background:none;">&times;</button></span></div>`;
         }).join('');
-        document.getElementById('totalVenta').innerText = totalTicket.toFixed(2);
+        document.getElementById('totalVenta').innerText = t.toFixed(2);
     }
 
     function finalizarVenta() {
         if(ticket.length === 0) return;
-        
-        const nuevaVenta = { 
-            id: Date.now(), 
-            fecha: new Date().toLocaleString(), 
-            items: [...ticket], 
-            total: ticket.reduce((a,b) => a + b.subtotal, 0) 
-        };
-
-        ticket.forEach(item => {
-            const idx = productos.findIndex(p => p.id === item.id);
-            if(idx !== -1) productos[idx].kilos -= item.cantidad;
-        });
-
-        ventasHoy.unshift(nuevaVenta);
+        const v = { id: Date.now(), items: [...ticket], total: ticket.reduce((a,b)=>a+b.subtotal,0), hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+        ticket.forEach(item => { const idx = productos.findIndex(p => p.id === item.id); if(idx !== -1) productos[idx].kilos -= item.cantidad; });
+        ventasHoy.unshift(v);
         localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        
-        ticket = [];
-        document.getElementById('modoTicket').style.display = 'none';
-        actualizarUI();
-        renderizarProductos();
-        alert("¡Venta registrada con éxito!");
+        ticket = []; actualizarUI(); renderizarProductos();
+        alert("Venta registrada.");
     }
 
     function abrirHistorialVentas() {
-        document.getElementById('modalTitulo').innerText = "Ventas de Hoy";
-        const cuerpo = document.getElementById('modalCuerpo');
-        if(ventasHoy.length === 0) {
-            cuerpo.innerHTML = "<p style='text-align:center;'>No hay ventas registradas aún.</p>";
-        } else {
-            let html = `<table style="width:100%; border-collapse:collapse; font-size:0.9em;">
-                <thead style="background:#eee;"><tr><th style="padding:10px;">Hora</th><th>Total</th><th style="text-align:right;">Acción</th></tr></thead><tbody>`;
-            ventasHoy.forEach(v => {
-                html += `<tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:10px;">${v.fecha.split(' ')[1]}</td>
-                    <td>$${v.total.toFixed(2)}</td>
-                    <td style="text-align:right;">
-                        <button onclick="modificarVenta(${v.id})" style="background:var(--info); color:white; border:none; padding:5px; border-radius:4px; cursor:pointer;">MODIFICAR</button>
-                    </td>
-                </tr>`;
-            });
-            html += `</tbody></table>`;
-            cuerpo.innerHTML = html;
-        }
+        document.getElementById('modalTitulo').innerText = "Ventas Realizadas";
+        let html = `<table class="table-ventas"><thead><tr><th>Hora</th><th>Total</th><th>Acción</th></tr></thead><tbody>`;
+        ventasHoy.forEach(v => {
+            html += `<tr><td>${v.hora}</td><td>$${v.total.toFixed(2)}</td><td>
+                <button class="btn-cancelar" onclick="cancelarVenta(${v.id})">CANCELAR</button>
+            </td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById('modalCuerpo').innerHTML = html;
         document.getElementById('modalUniversal').style.display = 'flex';
     }
 
-    function modificarVenta(ventaId) {
+    function cancelarVenta(ventaId) {
+        if(!confirm("¿Regresar stock y borrar venta?")) return;
         const idx = ventasHoy.findIndex(v => v.id === ventaId);
-        const venta = ventasHoy[idx];
-
-        venta.items.forEach(item => {
-            const pIdx = productos.findIndex(p => p.id === item.id);
-            if(pIdx !== -1) productos[pIdx].kilos += item.cantidad;
-        });
-
-        ticket = [...venta.items];
+        ventasHoy[idx].items.forEach(item => { const pIdx = productos.findIndex(p => p.id === item.id); if(pIdx !== -1) productos[pIdx].kilos += item.cantidad; });
         ventasHoy.splice(idx, 1);
-        
         localStorage.setItem('recauderia_ventas', JSON.stringify(ventasHoy));
         localStorage.setItem('recauderia_prods', JSON.stringify(productos));
-        
-        renderizarProductos();
-        actualizarUI();
-        document.getElementById('modoTicket').style.display = 'inline';
-        cerrarModal();
+        cerrarModal(); renderizarProductos();
+    }
+
+    function prepararCierreDiario() {
+        const total = ventasHoy.reduce((a,b)=>a+b.total, 0);
+        document.getElementById('modalTitulo').innerText = "Cierre de Turno";
+        document.getElementById('modalCuerpo').innerHTML = `<h3>Efectivo en caja: $${total.toFixed(2)}</h3><button class="btn-confirm" onclick="ejecutarCierre()">CONFIRMAR CIERRE</button>`;
+        document.getElementById('modalUniversal').style.display = 'flex';
+    }
+
+    function ejecutarCierre() {
+        historicoVentas.push({ fecha: new Date().toLocaleDateString(), total: ventasHoy.reduce((a,b)=>a+b.total, 0) });
+        localStorage.setItem('recauderia_historico', JSON.stringify(historicoVentas));
+        ventasHoy = []; localStorage.removeItem('recauderia_ventas');
+        location.reload();
     }
 
     function cerrarModal() { document.getElementById('modalUniversal').style.display = 'none'; }
-    function limpiarTicket() { ticket = []; actualizarUI(); }
-
     window.onload = renderizarProductos;
 </script>
-
 </body>
 </html>
